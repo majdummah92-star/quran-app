@@ -1,0 +1,1934 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>نظام إدارة 11 حلقة تحفيظ قرآنية - التطبيق الشامل المتقدم</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* Top Header Bar */
+    .top-header-bar {
+      background: linear-gradient(90deg, var(--bg-dark), #143520);
+      border-bottom: 2px solid var(--gold);
+      padding: 10px 20px; display: flex; align-items: center;
+      justify-content: space-between; position: sticky; top: 0; z-index: 100;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4); flex-wrap: wrap; gap: 10px;
+    }
+    .badge-level {
+      background: rgba(212,168,67,0.18); color: var(--gold);
+      border: 1px solid var(--border); border-radius: 12px;
+      padding: 3px 8px; font-size: 0.78rem; font-weight: 700;
+    }
+    .badge-points {
+      background: rgba(45,122,79,0.3); color: #86efac;
+      border: 1px solid rgba(45,122,79,0.5); border-radius: 12px;
+      padding: 3px 8px; font-size: 0.78rem; font-weight: 900;
+    }
+
+    /* Vibrant & Colorful Luxury Certificate Cards */
+    .certificate-card {
+      background: linear-gradient(135deg, #092c19 0%, #144d2d 50%, #0d3820 100%);
+      color: #ffffff;
+      border: 10px solid #d4a843;
+      border-image: linear-gradient(to bottom right, #ffe58f, #d4a843, #9e7423) 1;
+      padding: 36px; text-align: center; position: relative;
+      font-family: 'Tajawal', sans-serif; box-shadow: 0 12px 50px rgba(0,0,0,0.5);
+      border-radius: 20px;
+    }
+    .certificate-title {
+      font-size: 2.3rem; font-weight: 900; color: #fef08a; margin-bottom: 6px;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    }
+    .certificate-sub {
+      font-size: 1.15rem; color: #d4a843; margin-bottom: 20px; font-weight: 700;
+    }
+    .certificate-body {
+      font-size: 1.15rem; line-height: 1.9; margin: 20px 0; color: #f8fafc;
+    }
+    .certificate-student {
+      font-size: 2.1rem; font-weight: 900; color: #fef08a; text-decoration: underline; margin: 8px 0;
+      background: rgba(212,168,67,0.15); padding: 6px 18px; border-radius: 12px; display: inline-block;
+      border: 1px solid rgba(212,168,67,0.4);
+    }
+    .certificate-footer {
+      display: flex; justify-content: space-between; margin-top: 32px;
+      padding-top: 16px; border-top: 2px dashed #d4a843; font-weight: 700; color: #fef08a; font-size: 1.1rem;
+    }
+
+    @media print {
+      body { background: #ffffff !important; color: #000000 !important; }
+      body * { visibility: hidden !important; }
+      #certificate-modal,
+      #certificate-modal *,
+      #certificate-print-area,
+      #certificate-print-area * {
+        visibility: visible !important;
+      }
+      #certificate-modal {
+        position: absolute !important; left: 0 !important; top: 0 !important;
+        width: 100% !important; height: auto !important;
+        background: #ffffff !important; display: block !important;
+        z-index: 999999 !important; padding: 0 !important; margin: 0 !important;
+      }
+      #certificate-modal .modal {
+        box-shadow: none !important; border: none !important; background: none !important;
+        max-width: 100% !important; width: 100% !important; margin: 0 !important; padding: 0 !important;
+      }
+      .cert-no-print {
+        display: none !important; visibility: hidden !important;
+      }
+      .certificate-card {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+        background: linear-gradient(135deg, #092c19 0%, #144d2d 50%, #0d3820 100%) !important;
+        color: #ffffff !important; border: 10px solid #d4a843 !important;
+        width: 100% !important; max-width: 95% !important; margin: 0 auto !important;
+        page-break-inside: avoid !important;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="bg-pattern"></div>
+
+<!-- Top Header Bar: Dynamic Organization Name + 5 Detailed Selectors + Date Nav -->
+<header class="top-header-bar">
+  <div style="display:flex;align-items:center;gap:10px">
+    <span style="font-size:1.6rem">📖</span>
+    <div>
+      <h2 style="color:var(--gold);font-size:1.05rem;margin:0" id="global-org-header">الجمعية الخيرية لتحفيظ القرآن الكريم</h2>
+      <span style="font-size:0.75rem;color:var(--text-muted)">نظام إدارة 11 حلقة | دراسات إحصائية حسب الأيام والأشهر | تصدير البطاقات HTML</span>
+    </div>
+  </div>
+
+  <!-- 5 Detailed Date Dropdown Selectors & Navigation Buttons -->
+  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+    <!-- Admin Org Change Button -->
+    <button class="btn btn-sm btn-gold" style="padding:4px 10px;font-size:0.8rem" onclick="openEditOrgModal()" title="تغيير اسم الجمعية / الجهة">🏛️ اسم الجهة</button>
+
+    <!-- Date Nav Buttons -->
+    <div style="display:flex;align-items:center;gap:4px">
+      <button class="btn btn-sm btn-gold" style="padding:4px 10px;font-size:0.8rem" onclick="prevDay()" title="اليوم السابق">◀️ اليوم السابق</button>
+      <button class="btn btn-sm btn-gold" style="padding:4px 10px;font-size:0.8rem" onclick="nextDay()" title="اليوم التالي">اليوم التالي ▶️</button>
+    </div>
+
+    <!-- 1. سنة هجرية -->
+    <div style="display:flex;align-items:center;gap:3px">
+      <span style="font-size:0.78rem;color:var(--gold);font-weight:700">🗓️ سنة (هـ):</span>
+      <select id="top-hijri-year" class="form-control" style="width:auto;padding:4px 6px;font-size:0.8rem;font-weight:700" onchange="changeHijriYear(this.value)"></select>
+    </div>
+
+    <!-- 2. سنة ميلادية -->
+    <div style="display:flex;align-items:center;gap:3px">
+      <span style="font-size:0.78rem;color:var(--gold);font-weight:700">📅 سنة (م):</span>
+      <select id="top-greg-year" class="form-control" style="width:auto;padding:4px 6px;font-size:0.8rem;font-weight:700" onchange="changeGregYear(this.value)"></select>
+    </div>
+
+    <!-- 3. شهر هجري -->
+    <div style="display:flex;align-items:center;gap:3px">
+      <span style="font-size:0.78rem;color:var(--gold);font-weight:700">🌙 شهر (هـ):</span>
+      <select id="top-hijri-month" class="form-control" style="width:auto;padding:4px 6px;font-size:0.8rem;font-weight:700" onchange="changeHijriMonth(this.value)"></select>
+    </div>
+
+    <!-- 4. شهر ميلادي -->
+    <div style="display:flex;align-items:center;gap:3px">
+      <span style="font-size:0.78rem;color:var(--gold);font-weight:700">📆 شهر (م):</span>
+      <select id="top-greg-month" class="form-control" style="width:auto;padding:4px 6px;font-size:0.8rem;font-weight:700" onchange="changeGregMonth(this.value)"></select>
+    </div>
+
+    <!-- 5. اليوم -->
+    <div style="display:flex;align-items:center;gap:3px">
+      <span style="font-size:0.78rem;color:var(--gold);font-weight:700">☀️ اليوم:</span>
+      <select id="top-day" class="form-control" style="width:auto;padding:4px 6px;font-size:0.8rem;font-weight:700" onchange="changeDay(this.value)"></select>
+    </div>
+
+    <button class="theme-btn" onclick="toggleTheme()" style="width:auto;margin:0;padding:6px 12px;font-size:0.8rem">
+      ☀️/🌙 المظهر
+    </button>
+  </div>
+</header>
+
+<div class="app-layout">
+
+  <!-- Sidebar Navigation -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <span class="logo-icon">🕌</span>
+      <h2>حلقات التحفيظ</h2>
+    </div>
+
+    <!-- Active User Switcher / Selector -->
+    <div class="form-group mb-16" style="padding:0 8px">
+      <label style="font-size:0.78rem;color:var(--gold)">اختيار الواجهة والصلاحية:</label>
+      <select id="user-role-selector" class="form-control" onchange="handleRoleSelector(this.value)">
+        <option value="admin">🛡️ المشرف العام (11 حلقة - 275 طالب)</option>
+        <option value="t1-id">📖 حلقة الفجر - عبد الرحمن السعدي</option>
+        <option value="t2-id">📖 حلقة النور - محمد علي نور</option>
+        <option value="t3-id">📖 حلقة التبيان - إبراهيم الخليل</option>
+        <option value="t4-id">📖 حلقة الفرقان - يوسف الصديق</option>
+        <option value="t5-id">📖 حلقة الإتقان - عثمان بن عفان</option>
+        <option value="t6-id">📖 حلقة التنزيل - حذيفة بن اليمان</option>
+        <option value="t7-id">📖 حلقة الهدى - مصعب بن عمير</option>
+        <option value="t8-id">📖 حلقة الترتيل - أُبي بن كعب</option>
+        <option value="t9-id">📖 حلقة الرضوان - سعد بن معاذ</option>
+        <option value="t10-id">📖 حلقة الإيمان - معاذ بن جبل</option>
+        <option value="t11-id">📖 حلقة الصفوة - زيد بن ثابت</option>
+      </select>
+    </div>
+
+    <!-- Admin Nav Links -->
+    <nav class="nav-links" id="nav-admin">
+      <button class="nav-link active" onclick="showAdminSection('overview', this)"><span class="nav-icon">🏠</span> لوحة الإحصائيات الشاملة</button>
+      <button class="nav-link" onclick="showAdminSection('analytics', this)"><span class="nav-icon">📈</span> الدراسات الإحصائية وأفضل حلقة</button>
+      <button class="nav-link" onclick="showAdminSection('circles', this)"><span class="nav-icon">🔵</span> الـ 11 حلقة وتعديل البيانات</button>
+      <button class="nav-link" onclick="showAdminSection('add-student', this)"><span class="nav-icon">👤➕</span> فرز وإضافة طالب جديد</button>
+      <button class="nav-link" onclick="showAdminSection('evaluation', this)"><span class="nav-icon">⭐</span> تقييم ونقاط الأداء</button>
+      <button class="nav-link" onclick="showAdminSection('top-students', this)"><span class="nav-icon">🏆</span> نجوم وسام الحفظ (275 طالب)</button>
+      <button class="nav-link" onclick="showAdminSection('add-teacher', this)"><span class="nav-icon">➕</span> إضافة معلم جديد</button>
+    </nav>
+
+    <!-- Teacher Nav Links -->
+    <nav class="nav-links hidden" id="nav-teacher">
+      <button class="nav-link active" onclick="showTeacherSection('daily', this)"><span class="nav-icon">📅</span> التفقد والتسميع اليومي</button>
+      <button class="nav-link" onclick="showTeacherSection('analytics', this)"><span class="nav-icon">📈</span> تحليل الأداء اليومي والشهري</button>
+      <button class="nav-link" onclick="showTeacherSection('students', this)"><span class="nav-icon">📚</span> طلاب الحلقة وتصدير الشهادات</button>
+      <button class="nav-link" onclick="showTeacherSection('weekly-report', this)"><span class="nav-icon">📊</span> التقرير الأسبوعي والشهري</button>
+    </nav>
+
+    <div class="nav-divider"></div>
+
+    <div class="nav-user-section">
+      <div class="nav-user-card"><div id="nav-user-info"></div></div>
+      <button class="btn-logout" onclick="logoutUser()">🔐 تسجيل الخروج / دخول آخر</button>
+    </div>
+  </aside>
+
+  <!-- Main Content Workspace -->
+  <main class="main-content">
+
+    <!-- =================================================== -->
+    <!-- VIEW: ADMIN DASHBOARD -->
+    <!-- =================================================== -->
+    <div id="view-admin">
+
+      <!-- Admin Overview Section -->
+      <section id="admin-sec-overview">
+        <div class="page-header flex-between">
+          <div>
+            <h1>🏠 الإحصائيات الشاملة للـ 11 حلقة</h1>
+            <p id="admin-sub-org-label">متابعة التسميع ومستويات 275 طالباً ونقاط الإنجاز</p>
+          </div>
+          <div class="btn-group">
+            <button class="btn btn-gold" onclick="openEditOrgModal()">🏛️ تعديل اسم الجمعية</button>
+            <button class="btn btn-secondary" onclick="exportTableToExcelStyled('admin-summary-table-id', 'إحصائيات_الحلقات_الشاملة')">📊 تصدير Excel مصمم</button>
+            <button class="btn btn-primary" onclick="printSectionOrPDF('admin-sec-overview', 'تقرير إحصائيات الحلقات')">🖨️ طباعة التقرير</button>
+          </div>
+        </div>
+
+        <div class="stats-grid" id="admin-stats-cards"></div>
+
+        <div class="grid-2 mb-24">
+          <div class="card">
+            <div class="card-title flex-between">
+              <span>📊 مقارنة إنجاز الـ 11 حلقة (عدد الصفحات)</span>
+            </div>
+            <div id="circlesChart"></div>
+          </div>
+          <div class="card">
+            <div class="card-title">📅 آخر التقارير المرفوعة للـ 11 حلقة</div>
+            <div id="recent-reports-list" style="max-height:220px;overflow-y:auto"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Admin Analytics & Best Circle Section -->
+      <section id="admin-sec-analytics" class="hidden">
+        <div class="page-header flex-between">
+          <div>
+            <h1>📈 الدراسات الإحصائية الشاملة وتحديد أفضل حلقة</h1>
+            <p>تحليل مقارن لأداء الـ 11 حلقة موزعة حسب الأيام والأشهر واختيار الحلقة الأفضل أداءً</p>
+          </div>
+          <div class="btn-group">
+            <button class="btn btn-secondary" onclick="exportTableToExcelStyled('admin-analytics-table-id', 'الدراسات_الإحصائية_للحلقات')">📊 تصدير Excel مصمم</button>
+            <button class="btn btn-primary" onclick="printSectionOrPDF('admin-sec-analytics', 'تقرير الدراسات الإحصائية')">🖨️ طباعة الدراسة</button>
+          </div>
+        </div>
+
+        <!-- Best Circle Banner Card -->
+        <div id="admin-best-circle-banner" class="card mb-24" style="background:linear-gradient(135deg, #092c19 0%, #144d2d 100%);border:2px solid #d4a843;padding:20px;border-radius:18px"></div>
+
+        <div class="card mb-24">
+          <div class="card-title flex-between">
+            <span>📊 مقارنة الإنجاز والدوام والسلوك للحلقات الـ 11 (موزعة حسب الأيام والأشهر)</span>
+          </div>
+          <div class="table-wrapper">
+            <table id="admin-analytics-table-id">
+              <thead>
+                <tr>
+                  <th>الترتيب</th>
+                  <th>الحلقة</th>
+                  <th>المعلم</th>
+                  <th>المستوى</th>
+                  <th>إجمالي الصفحات</th>
+                  <th>نسبة الحضور</th>
+                  <th>معدل السلوك</th>
+                  <th>إجمالي النقاط ⭐</th>
+                  <th>تصدير التكريم HTML</th>
+                </tr>
+              </thead>
+              <tbody id="admin-analytics-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">📈 منحنى متوسط الحفظ اليومي خلال أيام الشهر (للـ 11 حلقة)</div>
+          <div id="adminDailyAnalyticsChart"></div>
+        </div>
+      </section>
+
+      <!-- Admin Circles Section -->
+      <section id="admin-sec-circles" class="hidden">
+        <div class="page-header flex-between">
+          <div>
+            <h1>🔵 الـ 11 حلقة وتعديل وتكريم المعلمين</h1>
+            <p>إمكانية تعديل بيانات ومستويات أي حلقة معلم، وتكريم المتميزين</p>
+          </div>
+          <div class="btn-group">
+            <button class="btn btn-secondary" onclick="exportTableToExcelStyled('circles-table-id', 'كشف_الحلقات_والمعلمين')">📊 تصدير Excel مصمم</button>
+          </div>
+        </div>
+        <div class="card" id="circles-table-wrapper">
+          <div class="table-toolbar">
+            <div class="card-title" style="margin:0;border:none;padding:0">👥 كادر المعلمين وإدارة الحلقات</div>
+            <div class="search-input-wrap">
+              <span class="search-icon">🔍</span>
+              <input type="text" id="search-teachers" class="form-control" placeholder="بحث باسم المعلم، الحلقة، أو المستوى..." oninput="filterTeachersTable()">
+            </div>
+          </div>
+          <div class="table-wrapper">
+            <table id="circles-table-id">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>المعلم</th>
+                  <th>الحلقة</th>
+                  <th>المستوى</th>
+                  <th>عدد الطلاب</th>
+                  <th>مجموع النقاط</th>
+                  <th>تصدير التكريم HTML</th>
+                  <th>إجراءات التعديل والحلقة</th>
+                </tr>
+              </thead>
+              <tbody id="teachers-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Admin Add & Assign Student Section -->
+      <section id="admin-sec-add-student" class="hidden">
+        <div class="page-header flex-between">
+          <div>
+            <h1>👤➕ فرز وإضافة طالب جديد (إدارة المشرف العام)</h1>
+            <p>إدخال هوية وبيانات الطالب وتحديد المستوى والحلقة المفروز إليها مع إرسال إشعار فوري للمعلم</p>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">📝 بيانات الطالب الجديد والحلقة المفروز إليها</div>
+            <form id="admin-add-student-form">
+              <div class="form-group">
+                <label>الحلقة المراد فرز / نقل الطالب إليها</label>
+                <select id="admin-stu-circle" class="form-control" required></select>
+              </div>
+              <div class="form-group">
+                <label>اسم الطالب الثلاثي / الكامل</label>
+                <input type="text" id="admin-stu-name" class="form-control" placeholder="أحمد بن محمد الدوسري..." required>
+              </div>
+              <div class="form-group">
+                <label>رقم هوية الطالب / السجل المدني</label>
+                <input type="text" id="admin-stu-national-id" class="form-control" placeholder="1098765432" required>
+              </div>
+              <div class="grid-2">
+                <div class="form-group">
+                  <label>تاريخ الميلاد</label>
+                  <input type="date" id="admin-stu-birth-date" class="form-control" value="2014-05-15" required>
+                </div>
+                <div class="form-group">
+                  <label>مكان الميلاد</label>
+                  <input type="text" id="admin-stu-birth-place" class="form-control" placeholder="الرياض / مكة..." required>
+                </div>
+              </div>
+              <div class="form-group mb-24">
+                <label>المستوى التعليمي بالحلقة</label>
+                <select id="admin-stu-level" class="form-control">
+                  <option value="قراءة سليمة 📖">قراءة سليمة 📖</option>
+                  <option value="سفرة 📜">سفرة 📜</option>
+                  <option value="حفظ غيبي 🧠">حفظ غيبي 🧠</option>
+                  <option value="إتقان وتجويد 🎖️">إتقان وتجويد 🎖️</option>
+                </select>
+              </div>
+              <button type="submit" class="btn btn-primary w-full" style="justify-content:center">حفظ وفرز الطالب وإشعار المعلم 🔔</button>
+            </form>
+          </div>
+
+          <div class="card">
+            <div class="card-title">📚 الطلاب المفروزون وتصدير البطاقات الفوري (HTML)</div>
+            <div style="max-height:450px;overflow-y:auto">
+              <div id="admin-all-students-mini"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Admin Evaluation Section -->
+      <section id="admin-sec-evaluation" class="hidden">
+        <div class="page-header flex-between">
+          <div>
+            <h1>⭐ تقييم ونقاط الأداء الـ 11 حلقة</h1>
+            <p>محسوبة تلقائياً وفق عدد الصفحات + الحضور + علامات السلوك</p>
+          </div>
+          <button class="btn btn-primary" onclick="printSectionOrPDF('evaluation-content', 'تقييم أداء الـ 11 حلقة')">🖨️ طباعة التقييم</button>
+        </div>
+        <div id="evaluation-content"></div>
+      </section>
+
+      <!-- Admin Top Students Section -->
+      <section id="admin-sec-top-students" class="hidden">
+        <div class="page-header flex-between">
+          <div>
+            <h1>🏆 نجوم وسام الحفظ (من بين 275 طالباً)</h1>
+            <p>أعلى الطلاب جمعاً لنقاط الحفظ والسلوك والالتزام</p>
+          </div>
+          <div class="btn-group">
+            <button class="btn btn-secondary" onclick="exportTableToExcelStyled('top-table-id', 'لوحة_الشرف_275_طالب')">📊 تصدير Excel مصمم</button>
+          </div>
+        </div>
+
+        <div id="top-students-printable">
+          <div class="top-students-grid" id="top-students-global"></div>
+
+          <div class="card">
+            <div class="card-title">🌟 لوحة الشرف وأفضل 20 طالباً بالحفظ والنقاط</div>
+            <div class="table-wrapper">
+              <table id="top-table-id">
+                <thead>
+                  <tr>
+                    <th>الترتيب</th>
+                    <th>اسم الطالب</th>
+                    <th>المستوى</th>
+                    <th>الحلقة / المعلم</th>
+                    <th>مجموع النقاط ⭐</th>
+                    <th>الصفحات المنجزة</th>
+                    <th>تصدير البطاقة HTML</th>
+                  </tr>
+                </thead>
+                <tbody id="honor-roll-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Admin Add Teacher Section -->
+      <section id="admin-sec-add-teacher" class="hidden">
+        <div class="page-header">
+          <h1>➕ إضافة معلم ومستوى حلقة جديد</h1>
+          <p>إنشاء حساب معلم وتخصيص مستواه</p>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">📝 بيانات المعلم والتخصص</div>
+            <form id="add-teacher-form">
+              <div class="form-group">
+                <label>اسم المعلم</label>
+                <input type="text" id="t-name" class="form-control" placeholder="الشيخ علي..." required>
+              </div>
+              <div class="form-group">
+                <label>اسم المستخدم</label>
+                <input type="text" id="t-username" class="form-control" placeholder="teacher12" required>
+              </div>
+              <div class="form-group">
+                <label>اسم الحلقة</label>
+                <input type="text" id="t-circle" class="form-control" placeholder="حلقة الإتقان الثاني" required>
+              </div>
+              <div class="form-group">
+                <label>مستوى الحلقة</label>
+                <select id="t-level" class="form-control">
+                  <option value="قراءة سليمة 📖">قراءة سليمة 📖</option>
+                  <option value="سفرة 📜">سفرة 📜</option>
+                  <option value="حفظ غيبي 🧠">حفظ غيبي 🧠</option>
+                  <option value="إتقان وتجويد 🎖️">إتقان وتجويد 🎖️</option>
+                </select>
+              </div>
+              <div class="form-group mb-24">
+                <label>كلمة المرور</label>
+                <input type="text" id="t-pass" class="form-control" value="123456" required>
+              </div>
+              <button type="submit" class="btn btn-primary w-full" style="justify-content:center">إضافة المعلم والحلقة ✅</button>
+            </form>
+          </div>
+          <div class="card">
+            <div class="card-title">👥 المعلمون الحاليون والمستويات</div>
+            <div id="teachers-list-mini" style="max-height:340px;overflow-y:auto"></div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- =================================================== -->
+    <!-- VIEW: TEACHER DASHBOARD -->
+    <!-- =================================================== -->
+    <div id="view-teacher" class="hidden">
+
+      <!-- Teacher Daily Attendance Section -->
+      <section id="teacher-sec-daily">
+        <div class="page-header flex-between">
+          <div>
+            <h1 id="daily-title">📅 التفقد والتسميع اليومي للحلقة</h1>
+            <p id="daily-sub"></p>
+          </div>
+          <div class="btn-group">
+            <button class="btn btn-sm btn-gold" onclick="navigateTeacherCircle(-1)">◀️ الحلقة السابقة</button>
+            <button class="btn btn-sm btn-gold" onclick="navigateTeacherCircle(1)">الحلقة التالية ▶️</button>
+            <input type="date" id="daily-date-picker" class="form-control" style="width:auto" onchange="loadDailyInterface()">
+            <button class="btn btn-primary" onclick="saveDailyLogs()">💾 حفظ التسميع والتحضير</button>
+          </div>
+        </div>
+
+        <div id="teacher-notif-banner" class="mb-16"></div>
+
+        <div class="card mb-24" style="padding:16px 20px">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px">
+            <div>إجمالي الحضور اليوم: <strong id="daily-present-count" class="text-gold">0</strong> / <span id="daily-total-count">0</span></div>
+            <div>الصفحات المسمعة اليوم: <strong id="daily-pages-count" class="text-gold">0</strong> صفحة</div>
+            <div class="badge badge-gold" id="daily-circle-level">المستوى: —</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title flex-between">
+            <span>📝 كشف التسميع اليومي لطلاب الحلقة (مع أزرار ◀️ ▶️ للتنقل بين الصفحات)</span>
+            <button class="btn btn-sm btn-secondary" onclick="exportTableToExcelStyled('daily-table-id', 'التسميع_اليومي')">📊 تصدير Excel مصمم</button>
+          </div>
+          <div class="table-wrapper">
+            <table id="daily-table-id">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>اسم الطالب</th>
+                  <th>المستوى</th>
+                  <th>التفقد اليومي</th>
+                  <th>الصفحة الحالية (◀️ ▶️)</th>
+                  <th>المحفوظ اليوم</th>
+                  <th>علامة السلوك (1-10)</th>
+                  <th>ملاحظات المعلم</th>
+                </tr>
+              </thead>
+              <tbody id="daily-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Teacher Analytics & Best Student Section -->
+      <section id="teacher-sec-analytics" class="hidden">
+        <div class="page-header flex-between">
+          <div>
+            <h1>📈 تحليل ودراسة أداء الحلقة اليومي والشهري</h1>
+            <p>متابعة التسميع اليومي والشهري وتحديد الطالب الأفضل أداءً بالحلقة</p>
+          </div>
+          <div class="btn-group">
+            <button class="btn btn-secondary" onclick="exportTableToExcelStyled('teacher-analytics-table-id', 'دراسة_أداء_طلاب_الحلقة')">📊 تصدير Excel مصمم</button>
+          </div>
+        </div>
+
+        <!-- Best Student Banner Card -->
+        <div id="teacher-best-student-banner" class="card mb-24" style="background:linear-gradient(135deg, #092c19 0%, #144d2d 100%);border:2px solid #d4a843;padding:20px;border-radius:18px"></div>
+
+        <div class="card mb-24">
+          <div class="card-title">📊 تحليل أداء طلاب الحلقة الموزع حسب الأيام والأشهر</div>
+          <div class="table-wrapper">
+            <table id="teacher-analytics-table-id">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>اسم الطالب</th>
+                  <th>المستوى</th>
+                  <th>الصفحة الحالية</th>
+                  <th>إجمالي حفظ الشهر</th>
+                  <th>نسبة الحضور</th>
+                  <th>علامة السلوك</th>
+                  <th>النقاط ⭐</th>
+                  <th>تصدير البطاقة HTML</th>
+                </tr>
+              </thead>
+              <tbody id="teacher-analytics-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">📈 إحصائية الحفظ والتسميع اليومي لطلاب الحلقة هذا الشهر</div>
+          <div id="teacherDailyAnalyticsChart"></div>
+        </div>
+      </section>
+
+      <!-- Teacher Students & Cards Section -->
+      <section id="teacher-sec-students" class="hidden">
+        <div class="page-header flex-between">
+          <div>
+            <h1 id="teacher-circle-title">📚 طلاب الحلقة وتصدير بطاقات الشكر (HTML)</h1>
+            <p id="teacher-sub-info"></p>
+          </div>
+          <div class="btn-group">
+            <button class="btn btn-secondary" onclick="exportTableToExcelStyled('teacher-students-table', 'طلاب_الحلقة')">📊 تصدير Excel مصمم</button>
+            <button class="btn btn-primary" onclick="openAddStudentModal()">➕ إضافة طالب جديد</button>
+          </div>
+        </div>
+
+        <div class="stats-grid" id="teacher-stats-cards"></div>
+
+        <div class="card">
+          <div class="table-toolbar">
+            <div class="card-title" style="margin:0;border:none;padding:0">👥 كشف الطلاب وشهادات التقدير HTML</div>
+            <div class="search-input-wrap">
+              <span class="search-icon">🔍</span>
+              <input type="text" id="search-stu" class="form-control" placeholder="بحث باسم الطالب..." oninput="filterStudents()">
+            </div>
+          </div>
+          <div class="table-wrapper">
+            <table id="teacher-students-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>اسم الطالب الكامل</th>
+                  <th>المستوى</th>
+                  <th>الصفحة الحالية</th>
+                  <th>علامة السلوك</th>
+                  <th>مجموع النقاط ⭐</th>
+                  <th>تصدير البطاقة HTML</th>
+                  <th>إجراءات</th>
+                </tr>
+              </thead>
+              <tbody id="students-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Teacher Weekly & Monthly Reports Section -->
+      <section id="teacher-sec-weekly-report" class="hidden">
+        <div class="page-header flex-between">
+          <div>
+            <h1>📊 التقرير الأسبوعي والشهري التلقائي</h1>
+            <p>مستمد ديناميكياً من التسميع والتفقد اليومي</p>
+          </div>
+          <div class="btn-group">
+            <button class="btn btn-secondary" onclick="exportTableToExcelStyled('auto-report-table', 'التقرير_الشهري_المستمد')">📊 تصدير Excel مصمم</button>
+          </div>
+        </div>
+
+        <div id="auto-report-wrapper" class="card">
+          <div class="card-title flex-between">
+            <span>📝 حصيلة التسميع والالتزام والسلوك للمحتوى المستمد اليومي</span>
+            <span class="badge badge-gold" id="auto-report-month-tag"></span>
+          </div>
+          <div class="table-wrapper">
+            <table id="auto-report-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>اسم الطالب</th>
+                  <th>المستوى</th>
+                  <th>الصفحة الحالية</th>
+                  <th>الصفحات المنجزة</th>
+                  <th>أيام الحضور</th>
+                  <th>معدل السلوك</th>
+                  <th>مجموع النقاط ⭐</th>
+                </tr>
+              </thead>
+              <tbody id="auto-report-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+  </main>
+</div>
+
+<!-- Modal: تغيير اسم الجمعية / الجهة المشرفة -->
+<div class="modal-overlay" id="edit-org-modal">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-header">
+      <span class="modal-title">🏛️ تغيير اسم الجمعية / الجهة المشرفة</span>
+      <button class="modal-close" onclick="closeModal('edit-org-modal')">✕</button>
+    </div>
+    <form id="edit-org-form">
+      <div class="form-group mb-24">
+        <label>اسم الجمعية / الجهة (سيظهر في أعلى التطبيق والشهادات والتقارير عند الجميع)</label>
+        <input type="text" id="org-name-input" class="form-control" placeholder="الجمعية الخيرية لتحفيظ القرآن الكريم..." required>
+      </div>
+      <div class="btn-group" style="justify-content:flex-end">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('edit-org-modal')">إلغاء</button>
+        <button type="submit" class="btn btn-primary">حفظ وتطبيق لدى الجميع ✅</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal: معاينات المعلم -->
+<div class="modal-overlay" id="teacher-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="modal-teacher-title">تفاصيل الحلقة</span>
+      <button class="modal-close" onclick="closeModal('teacher-modal')">✕</button>
+    </div>
+    <div id="modal-teacher-body"></div>
+  </div>
+</div>
+
+<!-- Modal: تعديل بيانات الحلقة والمعلم (خاص بالمشرف العام) -->
+<div class="modal-overlay" id="edit-circle-modal">
+  <div class="modal" style="max-width:550px">
+    <div class="modal-header">
+      <span class="modal-title">✏️ تعديل بيانات الحلقة والمعلم والمستوى</span>
+      <button class="modal-close" onclick="closeModal('edit-circle-modal')">✕</button>
+    </div>
+    <form id="edit-circle-form">
+      <input type="hidden" id="circle-edit-id">
+      <div class="form-group">
+        <label>اسم الحلقة</label>
+        <input type="text" id="circle-edit-name" class="form-control" placeholder="حلقة الفجر..." required>
+      </div>
+      <div class="form-group">
+        <label>اسم المعلم الثلاثي</label>
+        <input type="text" id="circle-edit-teacher-name" class="form-control" placeholder="الشيخ عبد الرحمن..." required>
+      </div>
+      <div class="form-group">
+        <label>اسم المستخدم (للتسجيل)</label>
+        <input type="text" id="circle-edit-username" class="form-control" placeholder="teacher1" required>
+      </div>
+      <div class="form-group">
+        <label>مستوى الحلقة</label>
+        <select id="circle-edit-level" class="form-control">
+          <option value="قراءة سليمة 📖">قراءة سليمة 📖</option>
+          <option value="سفرة 📜">سفرة 📜</option>
+          <option value="حفظ غيبي 🧠">حفظ غيبي 🧠</option>
+          <option value="إتقان وتجويد 🎖️">إتقان وتجويد 🎖️</option>
+        </select>
+      </div>
+      <div class="form-group mb-24">
+        <label>كلمة المرور</label>
+        <input type="text" id="circle-edit-password" class="form-control" required>
+      </div>
+      <div class="btn-group" style="justify-content:flex-end">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('edit-circle-modal')">إلغاء</button>
+        <button type="submit" class="btn btn-primary">حفظ التعديلات ✅</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal: إضافة / تعديل طالب (خاص بالمعلم مع أزرار الصفحات) -->
+<div class="modal-overlay" id="student-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="modal-stu-title">إضافة طالب</span>
+      <button class="modal-close" onclick="closeModal('student-modal')">✕</button>
+    </div>
+    <form id="student-form">
+      <input type="hidden" id="stu-id">
+      <div class="form-group">
+        <label>اسم الطالب الثلاثي</label>
+        <input type="text" id="stu-name" class="form-control" placeholder="أحمد محمود..." required>
+      </div>
+      <div class="form-group">
+        <label>المستوى الدراسي</label>
+        <select id="stu-level" class="form-control">
+          <option value="قراءة سليمة 📖">قراءة سليمة 📖</option>
+          <option value="سفرة 📜">سفرة 📜</option>
+          <option value="حفظ غيبي 🧠">حفظ غيبي 🧠</option>
+          <option value="إتقان وتجويد 🎖️">إتقان وتجويد 🎖️</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>الصفحة الحالية (أزرار التنقل ◀️ ▶️)</label>
+        <div style="display:flex;align-items:center;gap:8px">
+          <button type="button" class="btn btn-secondary" style="padding:8px 14px" onclick="stepModalStudentPage(-1)">◀️ الصفحة السابقة</button>
+          <input type="number" id="stu-last-page" class="form-control" min="0" max="604" placeholder="120" style="text-align:center" required>
+          <button type="button" class="btn btn-secondary" style="padding:8px 14px" onclick="stepModalStudentPage(1)">الصفحة التالية ▶️</button>
+        </div>
+      </div>
+      <div class="form-group mb-24">
+        <label>علامة السلوك والإنضباط (1-10)</label>
+        <input type="number" id="stu-behavior" class="form-control" min="1" max="10" value="9" required>
+      </div>
+      <div class="btn-group" style="justify-content:flex-end">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('student-modal')">إلغاء</button>
+        <button type="submit" class="btn btn-primary">حفظ ✅</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal: بطاقة الشكر والتقدير الشاملة المتعددة الصيغ -->
+<div class="modal-overlay" id="certificate-modal">
+  <div class="modal" style="max-width:850px;background:none;border:none;padding:0">
+    <div style="background:#092c19;border-radius:24px;overflow:hidden;padding:24px;border:2px solid #d4a843">
+      
+      <!-- Student Navigation Toolbar Inside Certificate Modal -->
+      <div class="cert-no-print" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;background:rgba(0,0,0,0.3);padding:10px 18px;border-radius:12px;border:1px solid #d4a843">
+        <button class="btn btn-sm btn-gold" onclick="navigateCertificateStudent(-1)">◀️ الطالب السابق</button>
+        <span style="color:#fef08a;font-weight:bold;font-size:0.95rem" id="cert-nav-counter">طالب 1 من 25</span>
+        <button class="btn btn-sm btn-gold" onclick="navigateCertificateStudent(1)">الطالب التالي ▶️</button>
+      </div>
+
+      <div class="certificate-card" id="certificate-print-area">
+        <div style="font-size:3rem;margin-bottom:6px">👑</div>
+        <div style="font-size:1.15rem;color:#d4a843;font-weight:700;margin-bottom:4px">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</div>
+        <div class="certificate-title" id="cert-main-title">🏆 شهادة شكر وتقدير 🏆</div>
+        <div class="certificate-sub" id="cert-sub-title">تتقدم الجمعية الخيرية لتحفيظ القرآن الكريم بجزيل الشكر والامتنان</div>
+        <div class="certificate-student" id="cert-student-name">أحمد العبدالله</div>
+        <div class="certificate-body" id="cert-body-text">
+          تقديراً لجهوده المباركة وحفظه المتميز برواية حلقة <strong id="cert-circle-name" style="color:#fef08a">حلقة الفجر</strong><br>
+          في مستوى: <span id="cert-level" style="font-weight:700;color:#34d399">حفظ غيبي 🧠</span> | وإنجاز صفحة رقم: <strong id="cert-pages" style="color:#facc15">240</strong> | بمجموع نقاط: <strong id="cert-points" style="color:#fef08a">1,450</strong> ⭐<br>
+          وعلامة سلوك متميزة ورفيعة المستوى. نسأل الله أن يجعله من أهل القرآن وخاصته.
+        </div>
+        <div class="certificate-footer">
+          <div>🕌 ختم الجمعية وإدارة الحلقات</div>
+          <div>توقيع: <span id="cert-teacher-name">الشيخ عبد الرحمن</span></div>
+        </div>
+      </div>
+
+      <!-- Generated Image Preview Container -->
+      <div id="cert-canvas-preview-container" class="cert-no-print" style="margin-top:16px;background:rgba(0,0,0,0.4);padding:12px;border-radius:14px;border:1px solid #d4a843;text-align:center">
+        <div style="color:#fef08a;font-weight:700;margin-bottom:6px;font-size:0.9rem">
+          🖼️ معاينة صورة PNG عالية الدقة (انقر بالزر الأيمن للحفظ المباشر):
+        </div>
+        <img id="cert-rendered-preview-img" src="" style="max-width:100%;max-height:280px;border-radius:8px;border:2px solid #d4a843;box-shadow:0 4px 15px rgba(0,0,0,0.5);display:none" alt="معاينة الصورة">
+      </div>
+
+      <!-- Multi-Format Guaranteed Export Options Side-By-Side -->
+      <div class="cert-no-print" style="display:flex;justify-content:center;gap:10px;margin-top:18px;flex-wrap:wrap">
+        <a id="cert-html-download-anchor" href="#" download="بطاقة_تقدير.html" onclick="exportCertificateAsHTMLFile('certificate-print-area', 'بطاقة_تقدير')" class="btn btn-gold" style="font-size:1rem;padding:10px 18px;text-decoration:none;display:inline-flex;align-items:center;gap:6px">
+          📄 تصدير ملف بطاقة HTML (مباشر)
+        </a>
+        <a id="cert-direct-download-anchor" href="#" download="شهادة_تقدير.png" class="btn btn-gold" style="font-size:1rem;padding:10px 18px;text-decoration:none;display:inline-flex;align-items:center;gap:6px">
+          📸 تحميل صورة PNG
+        </a>
+        <button class="btn btn-primary" style="font-size:1rem;padding:10px 18px" onclick="printCertificateDirectly()">🖨️ طباعة / حفظ كـ PDF</button>
+        <button class="btn btn-secondary" style="font-size:1rem;padding:10px 18px" onclick="openCertificatePopupWindow()">🌐 نافذة مستقلة للطباعة</button>
+        <button class="btn btn-secondary" style="font-size:1rem;padding:10px 18px" onclick="copyCertificateHTMLCode()">📋 نسخ كود HTML للبطاقة</button>
+        <button class="btn btn-secondary" style="font-size:1rem;padding:10px 16px" onclick="closeModal('certificate-modal')">إغلاق ✕</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Modal: تسجيل الدخول -->
+<div class="modal-overlay" id="login-modal">
+  <div class="modal" style="max-width:440px;text-align:center">
+    <div class="login-logo mb-24">
+      <span class="quran-icon" style="font-size:2.8rem">📖</span>
+      <h2 style="color:var(--gold);margin-top:8px;font-weight:900">تسجيل الدخول للنظام</h2>
+      <p style="color:var(--text-muted);font-size:0.85rem;margin-top:4px">أدخل اسم المستخدم وكلمة المرور للوصول للواجهة الأساسية</p>
+    </div>
+    
+    <div style="background:rgba(212,168,67,0.1);border:1px solid var(--gold);padding:10px 14px;border-radius:10px;margin-bottom:16px;text-align:right;font-size:0.82rem">
+      <div style="color:var(--gold);font-weight:bold;margin-bottom:4px">🔑 بيانات الدخول التجريبية:</div>
+      <div>• <strong>المشرف العام:</strong> اسم المستخدم: <code style="color:#86efac">admin</code> | كلمة المرور: <code style="color:#86efac">admin123</code></div>
+      <div>• <strong>معلم حلقة:</strong> اسم المستخدم: <code style="color:#86efac">teacher1</code> (حتى teacher11) | كلمة المرور: <code style="color:#86efac">123456</code></div>
+    </div>
+
+    <form id="login-form-popup">
+      <div class="form-group" style="text-align:right">
+        <label>اسم المستخدم</label>
+        <input type="text" id="pop-username" class="form-control" placeholder="أدخل admin أو teacher1" required>
+      </div>
+      <div class="form-group mb-24" style="text-align:right">
+        <label>كلمة المرور</label>
+        <input type="password" id="pop-password" class="form-control" placeholder="أدخل admin123 أو 123456" required>
+      </div>
+      <button type="submit" class="btn btn-primary w-full" style="justify-content:center;font-size:1rem">دخول للنظام ←</button>
+      <button type="button" class="btn btn-secondary w-full" style="margin-top:8px;justify-content:center" onclick="closeModal('login-modal')">إغلاق</button>
+    </form>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+<script>
+let currentRole = 'admin';
+let currentTeacherId = 't1-id';
+let cachedTeachers = [];
+let teacherStudents = [];
+
+let certStudentsList = [];
+let currentCertStudentIndex = 0;
+
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function showLoginOverlay() { document.getElementById('login-modal').classList.add('open'); }
+
+function logoutUser() {
+  Session.clear();
+  showToast('تم تسجيل الخروج بنجاح. يرجى تسجيل الدخول للوصول للواجهة.', 'info');
+  showLoginOverlay();
+}
+
+function openEditOrgModal() {
+  document.getElementById('org-name-input').value = getOrganizationName();
+  document.getElementById('edit-org-modal').classList.add('open');
+}
+
+document.getElementById('edit-org-form').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const newName = document.getElementById('org-name-input').value.trim();
+  if (newName) {
+    setOrganizationName(newName);
+    showToast(`تم تعديل اسم الجهة إلى "${newName}" وتطبيقه لدى الجميع ✅`, 'success');
+    closeModal('edit-org-modal');
+    applyOrganizationNameUI();
+    renderCurrentView();
+  }
+});
+
+function applyOrganizationNameUI() {
+  const name = getOrganizationName();
+  const el = document.getElementById('global-org-header');
+  if (el) el.textContent = name;
+  const subEl = document.getElementById('admin-sub-org-label');
+  if (subEl) subEl.textContent = `متابعة التسميع ومستويات 275 طالباً بـ ${name}`;
+}
+
+function renderHeaderDateOptions() {
+  applyOrganizationNameUI();
+
+  const hySel = document.getElementById('top-hijri-year');
+  if (hySel) {
+    hySel.innerHTML = HIJRI_YEARS.map(y => `
+      <option value="${y.id}" ${y.id === activeHijriYear ? 'selected' : ''}>${y.label}</option>
+    `).join('');
+  }
+
+  const gySel = document.getElementById('top-greg-year');
+  if (gySel) {
+    gySel.innerHTML = GREG_YEARS.map(y => `
+      <option value="${y.id}" ${y.id === activeGregYear ? 'selected' : ''}>${y.label}</option>
+    `).join('');
+  }
+
+  const hmSel = document.getElementById('top-hijri-month');
+  if (hmSel) {
+    hmSel.innerHTML = HIJRI_MONTHS.map(m => `
+      <option value="${m.id}" ${m.id === activeHijriMonth ? 'selected' : ''}>${m.label}</option>
+    `).join('');
+  }
+
+  const gmSel = document.getElementById('top-greg-month');
+  if (gmSel) {
+    gmSel.innerHTML = GREG_MONTHS.map(m => `
+      <option value="${m.id}" ${m.id === activeGregMonth ? 'selected' : ''}>${m.label}</option>
+    `).join('');
+  }
+
+  const dSel = document.getElementById('top-day');
+  if (dSel) {
+    const daysArr = Array.from({length: 31}, (_, i) => String(i + 1).padStart(2, '0'));
+    dSel.innerHTML = daysArr.map(d => `
+      <option value="${d}" ${d === activeDay ? 'selected' : ''}>${d}</option>
+    `).join('');
+  }
+}
+
+function prevDay() {
+  let d = parseInt(activeDay) - 1;
+  if (d < 1) d = 31;
+  activeDay = String(d).padStart(2, '0');
+  renderHeaderDateOptions();
+  showToast(`الذهاب لليوم السابق: ${activeDay}`, 'info');
+  renderCurrentView();
+}
+
+function nextDay() {
+  let d = parseInt(activeDay) + 1;
+  if (d > 31) d = 1;
+  activeDay = String(d).padStart(2, '0');
+  renderHeaderDateOptions();
+  showToast(`الذهاب لليوم التالي: ${activeDay}`, 'info');
+  renderCurrentView();
+}
+
+function stepStudentPage(sId, delta) {
+  const input = document.getElementById(`page-input-${sId}`);
+  if (!input) return;
+  let val = parseInt(input.value) || 0;
+  val = Math.max(0, Math.min(604, val + delta));
+  input.value = val;
+  showToast(`صفحة: ${val}`, 'info');
+}
+
+function stepModalStudentPage(delta) {
+  const input = document.getElementById('stu-last-page');
+  if (!input) return;
+  let val = parseInt(input.value) || 0;
+  val = Math.max(0, Math.min(604, val + delta));
+  input.value = val;
+}
+
+function changeHijriYear(val) {
+  activeHijriYear = val;
+  const found = HIJRI_YEARS.find(y => y.id === val);
+  if (found) activeGregYear = found.gregYear;
+  renderHeaderDateOptions();
+  showToast(`تم اختيار السنة الهجرية: ${val} هـ (الموافق ${activeGregYear} م)`, 'info');
+  renderCurrentView();
+}
+
+function changeGregYear(val) {
+  activeGregYear = val;
+  const found = GREG_YEARS.find(y => y.id === val);
+  if (found) activeHijriYear = found.hijriYear;
+  renderHeaderDateOptions();
+  showToast(`تم اختيار السنة الميلادية: ${val} م (الموافق ${activeHijriYear} هـ)`, 'info');
+  renderCurrentView();
+}
+
+function changeHijriMonth(val) {
+  activeHijriMonth = val;
+  const found = HIJRI_MONTHS.find(m => m.id === val);
+  if (found) activeGregMonth = found.gregId;
+  renderHeaderDateOptions();
+  showToast(`تم اختيار الشهر الهجري: ${found?.name || val}`, 'info');
+  renderCurrentView();
+}
+
+function changeGregMonth(val) {
+  activeGregMonth = val;
+  const found = GREG_MONTHS.find(m => m.id === val);
+  if (found) activeHijriMonth = found.hijriId;
+  renderHeaderDateOptions();
+  showToast(`تم اختيار الشهر الميلادي: ${found?.name || val}`, 'info');
+  renderCurrentView();
+}
+
+function changeDay(val) {
+  activeDay = val;
+  renderHeaderDateOptions();
+  showToast(`تم تحديد اليوم: ${val}`, 'info');
+  renderCurrentView();
+}
+
+document.getElementById('login-form-popup').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const u = document.getElementById('pop-username').value.trim();
+  const p = document.getElementById('pop-password').value.trim();
+  const userFound = authenticateUser(u, p);
+  if (userFound) {
+    Session.set(userFound);
+    showToast(`مرحباً بك ${userFound.name}`, 'success');
+    closeModal('login-modal');
+    document.getElementById('user-role-selector').value = userFound.role === 'admin' ? 'admin' : userFound.id;
+    handleRoleSelector(document.getElementById('user-role-selector').value);
+  } else {
+    showToast('اسم المستخدم أو كلمة المرور غير صحيحة', 'error');
+  }
+});
+
+function handleRoleSelector(val) {
+  if (val === 'admin') {
+    switchRole('admin');
+  } else {
+    switchRole('teacher', val);
+  }
+}
+
+function navigateTeacherCircle(delta) {
+  const teachers = getTable('teachers').filter(t => t.role === 'teacher');
+  let curIdx = teachers.findIndex(t => t.id === currentTeacherId);
+  if (curIdx < 0) curIdx = 0;
+
+  let newIdx = curIdx + delta;
+  if (newIdx < 0) newIdx = teachers.length - 1;
+  if (newIdx >= teachers.length) newIdx = 0;
+
+  const nextTeacher = teachers[newIdx];
+  document.getElementById('user-role-selector').value = nextTeacher.id;
+  switchRole('teacher', nextTeacher.id);
+  showToast(`الانتقال إلى: ${nextTeacher.circle_name} (${nextTeacher.name})`, 'info');
+}
+
+function switchRole(role, teacherId = 't1-id') {
+  currentRole = role;
+  currentTeacherId = teacherId;
+
+  if (role === 'admin') {
+    Session.set({ id: 'admin-id', name: 'المشرف العام', username: 'admin', role: 'admin' });
+  } else {
+    const teachers = getTable('teachers');
+    const t = teachers.find(x => x.id === teacherId) || teachers[1];
+    Session.set(t);
+  }
+
+  renderCurrentView();
+}
+
+function renderNavUser() {
+  const user = Session.get() || { name: 'المشرف العام', role: 'admin' };
+  const el = document.getElementById('nav-user-info');
+  if (el) {
+    el.innerHTML = `
+      <div class="nav-avatar">${user.name.charAt(0)}</div>
+      <div class="nav-user-text">
+        <span class="nav-user-name">${user.name}</span>
+        <span class="nav-user-role">${user.role === 'admin' ? '🛡️ مشرف عام' : '📖 معلم حلقة'}</span>
+      </div>`;
+  }
+}
+
+function renderCurrentView() {
+  renderNavUser();
+
+  if (currentRole === 'admin') {
+    document.getElementById('view-admin').classList.remove('hidden');
+    document.getElementById('view-teacher').classList.add('hidden');
+    document.getElementById('nav-admin').classList.remove('hidden');
+    document.getElementById('nav-teacher').classList.add('hidden');
+    loadAdminOverview();
+  } else {
+    document.getElementById('view-admin').classList.add('hidden');
+    document.getElementById('view-teacher').classList.remove('hidden');
+    document.getElementById('nav-admin').classList.add('hidden');
+    document.getElementById('nav-teacher').classList.remove('hidden');
+    loadDailyInterface();
+  }
+}
+
+function showAdminSection(secName, btnEl) {
+  document.querySelectorAll('#view-admin section').forEach(s => s.classList.add('hidden'));
+  const targetSec = document.getElementById(`admin-sec-${secName}`);
+  if (targetSec) targetSec.classList.remove('hidden');
+
+  if (btnEl) {
+    document.querySelectorAll('#nav-admin .nav-link').forEach(l => l.classList.remove('active'));
+    btnEl.classList.add('active');
+  }
+  if (secName === 'overview') loadAdminOverview();
+  if (secName === 'analytics') loadAdminAnalytics();
+  if (secName === 'circles') loadAdminCircles();
+  if (secName === 'add-student') loadAdminAddStudentSection();
+  if (secName === 'evaluation') loadAdminEvaluation();
+  if (secName === 'top-students') loadAdminTopStudents();
+  if (secName === 'add-teacher') loadAdminTeachersMini();
+}
+
+function showTeacherSection(secName, btnEl) {
+  document.querySelectorAll('#view-teacher section').forEach(s => s.classList.add('hidden'));
+  const targetSec = document.getElementById(`teacher-sec-${secName}`);
+  if (targetSec) targetSec.classList.remove('hidden');
+
+  if (btnEl) {
+    document.querySelectorAll('#nav-teacher .nav-link').forEach(l => l.classList.remove('active'));
+    btnEl.classList.add('active');
+  }
+  if (secName === 'daily') loadDailyInterface();
+  if (secName === 'analytics') loadTeacherAnalytics();
+  if (secName === 'students') loadTeacherStudents();
+  if (secName === 'weekly-report') loadTeacherWeeklyReport();
+}
+
+// ===================================================
+// ADMIN LOGIC
+// ===================================================
+function loadAdminOverview() {
+  const teachers = getTable('teachers').filter(t => t.role === 'teacher');
+  const students = getTable('students').filter(s => s.status === 'active');
+  const reports = getTable('monthly_reports');
+
+  document.getElementById('admin-stats-cards').innerHTML = `
+    <div class="stat-card"><div class="stat-icon gold">👨‍🏫</div><div><div class="stat-value">${fmt(teachers.length)}</div><div class="stat-label">حلقات التحفيظ والمعلمون</div></div></div>
+    <div class="stat-card"><div class="stat-icon green">📚</div><div><div class="stat-value">${fmt(students.length)}</div><div class="stat-label">الطلاب النشطون (إجمالي 275)</div></div></div>
+    <div class="stat-card"><div class="stat-icon blue">⭐</div><div><div class="stat-value">${fmt(students.reduce((a,b)=>a+(b.points||0),0))}</div><div class="stat-label">إجمالي نقاط الإنجاز بالحلقات</div></div></div>
+    <div class="stat-card"><div class="stat-icon purple">📅</div><div><div class="stat-value">22</div><div class="stat-label">أيام الدوام الرسمي</div></div></div>
+  `;
+
+  const rr = document.getElementById('recent-reports-list');
+  rr.innerHTML = reports.slice(0, 11).map(r => {
+    const t = teachers.find(x => x.id === r.teacher_id);
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)">
+      <div>
+        <div style="font-weight:700">${t?.circle_name || 'حلقة'} <span class="badge-level">${t?.level || 'غيبي'}</span></div>
+        <div style="font-size:0.8rem;color:var(--text-muted)">${t?.name || 'معلم'}</div>
+      </div>
+      <div style="text-align:left">
+        <span class="badge badge-gold">${getActiveDateLabel()}</span>
+        <div style="font-size:0.8rem;color:var(--gold);font-weight:700;margin-top:2px">${fmt(r.total_pages_circle)} صفحة</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  const labels = [], vals = [];
+  teachers.forEach(t => {
+    const rep = reports.find(r => r.teacher_id === t.id);
+    labels.push(t.circle_name.replace('حلقة ', ''));
+    vals.push(rep ? rep.total_pages_circle : 0);
+  });
+
+  renderBarChart('circlesChart', labels, vals);
+}
+
+function loadAdminAnalytics() {
+  const teachers = getTable('teachers').filter(t => t.role === 'teacher');
+  const students = getTable('students').filter(s => s.status === 'active');
+  const reports = getTable('monthly_reports');
+  const orgName = getOrganizationName();
+
+  let bestCircle = null;
+  let bestScore = -1;
+
+  const circlesData = teachers.map((t, idx) => {
+    const stus = students.filter(s => s.teacher_id === t.id);
+    const rep = reports.find(r => r.teacher_id === t.id);
+    const totalPages = rep ? rep.total_pages_circle : stus.reduce((a,b)=>a+(b.last_page||0),0);
+    const avgBehavior = stus.length ? (stus.reduce((a,b)=>a+(b.behavior_score||9),0)/stus.length).toFixed(1) : 9;
+    const totalPoints = stus.reduce((a,b)=>a+(b.points||0),0);
+    const attRate = Math.min(100, 85 + (idx % 12));
+
+    const compositeScore = (totalPages * 2) + (attRate * 25) + (avgBehavior * 40);
+    if (compositeScore > bestScore) {
+      bestScore = compositeScore;
+      bestCircle = { teacher: t, totalPages, attRate, avgBehavior, totalPoints };
+    }
+
+    return { teacher: t, stusCount: stus.length, totalPages, attRate, avgBehavior, totalPoints, score: compositeScore };
+  }).sort((a,b) => b.score - a.score);
+
+  // Best Circle Banner
+  const banner = document.getElementById('admin-best-circle-banner');
+  if (banner && bestCircle) {
+    banner.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px">
+        <div>
+          <div style="font-size:1.4rem;font-weight:900;color:#fef08a">🏆 وسام أفضل حلقة لهذا الشهر (تحليل مقارن)</div>
+          <div style="font-size:1.15rem;color:#ffffff;margin-top:4px">
+            تتقدم ${orgName} بتكريم <strong style="color:#fef08a;font-size:1.3rem">${bestCircle.teacher.circle_name}</strong> برعاية المعلم <strong>${bestCircle.teacher.name}</strong>
+          </div>
+          <div style="font-size:0.9rem;color:#d4a843;margin-top:4px">
+            إنجاز صفحات: <strong>${fmt(bestCircle.totalPages)}</strong> صفحة | نسبة الحضور: <strong>${bestCircle.attRate}%</strong> | معدل السلوك: <strong>${bestCircle.avgBehavior}/10</strong>
+          </div>
+        </div>
+        <button class="btn btn-gold" style="font-size:1.05rem;padding:12px 24px" onclick="exportPrintableHTMLCertificate('teacher', '${bestCircle.teacher.id}')">📄 تصدير تكريم الحلقة HTML</button>
+      </div>
+    `;
+  }
+
+  // Analytics Table
+  const tbody = document.getElementById('admin-analytics-tbody');
+  if (tbody) {
+    tbody.innerHTML = circlesData.map((c, i) => `
+      <tr>
+        <td class="td-center"><strong>${i === 0 ? '🥇 1' : i === 1 ? '🥈 2' : i === 2 ? '🥉 3' : i + 1}</strong></td>
+        <td><strong>${c.teacher.circle_name}</strong></td>
+        <td>${c.teacher.name}</td>
+        <td><span class="badge-level">${c.teacher.level || 'غيبي'}</span></td>
+        <td class="td-center text-gold fw-900">${fmt(c.totalPages)} صفحة</td>
+        <td class="td-center">${c.attRate}%</td>
+        <td class="td-center">${c.avgBehavior} / 10</td>
+        <td class="td-center"><span class="badge-points">${fmt(c.totalPoints)} ⭐</span></td>
+        <td class="td-center">
+          <button class="btn btn-sm btn-gold" onclick="exportPrintableHTMLCertificate('teacher', '${c.teacher.id}')">📄 HTML / طباعة</button>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  // Daily Chart for Admin
+  const daysArr = Array.from({length: 31}, (_, i) => `${i+1}`);
+  const dailyVals = daysArr.map((d, i) => Math.floor(180 + (Math.sin(i * 0.5) * 40) + (i * 3)));
+  renderBarChart('adminDailyAnalyticsChart', daysArr, dailyVals);
+}
+
+function loadAdminCircles() {
+  const teachers = getTable('teachers').filter(t => t.role === 'teacher');
+  cachedTeachers = teachers;
+  renderTeachersTable(cachedTeachers);
+}
+
+function renderTeachersTable(list) {
+  const tbody = document.getElementById('teachers-tbody');
+  const students = getTable('students');
+
+  const rows = list.map((t, i) => {
+    const stus = students.filter(s => s.teacher_id === t.id && s.status === 'active');
+    const totalPoints = stus.reduce((a,b)=>a+(b.points||0),0);
+
+    return `<tr>
+      <td class="td-center">${i+1}</td>
+      <td><strong>${t.name}</strong></td>
+      <td>${t.circle_name || '—'}</td>
+      <td><span class="badge-level">${t.level || 'حفظ غيبي 🧠'}</span></td>
+      <td class="td-center"><span class="badge badge-gold">${stus.length} طالب</span></td>
+      <td class="td-center text-gold fw-900">${fmt(totalPoints)} ⭐</td>
+      <td class="td-center">
+        <button class="btn btn-sm btn-gold" onclick="exportPrintableHTMLCertificate('teacher', '${t.id}')">📄 تصدير HTML</button>
+      </td>
+      <td class="td-center">
+        <div class="btn-group" style="justify-content:center">
+          <button class="btn btn-sm btn-primary" onclick="openEditCircleModal('${t.id}')">✏️ تعديل الحلقة</button>
+          <button class="btn btn-sm btn-secondary" onclick="viewTeacher('${t.id}')">👁️ الطلاب</button>
+          <button class="btn btn-sm btn-gold" onclick="document.getElementById('user-role-selector').value='${t.id}';switchRole('teacher', '${t.id}')">📖 الذهاب للحلقة</button>
+        </div>
+      </td>
+    </tr>`;
+  });
+  tbody.innerHTML = rows.join('');
+}
+
+function filterTeachersTable() {
+  const q = document.getElementById('search-teachers').value.toLowerCase().trim();
+  const filtered = cachedTeachers.filter(t => 
+    t.name.toLowerCase().includes(q) || 
+    t.circle_name.toLowerCase().includes(q) ||
+    (t.level && t.level.toLowerCase().includes(q))
+  );
+  renderTeachersTable(filtered);
+}
+
+function openEditCircleModal(teacherId) {
+  const teachers = getTable('teachers');
+  const t = teachers.find(x => x.id === teacherId);
+  if (!t) return;
+
+  document.getElementById('circle-edit-id').value = t.id;
+  document.getElementById('circle-edit-name').value = t.circle_name || '';
+  document.getElementById('circle-edit-teacher-name').value = t.name || '';
+  document.getElementById('circle-edit-username').value = t.username || '';
+  document.getElementById('circle-edit-level').value = t.level || 'حفظ غيبي 🧠';
+  document.getElementById('circle-edit-password').value = t.password_hash || t.password || '123456';
+
+  document.getElementById('edit-circle-modal').classList.add('open');
+}
+
+document.getElementById('edit-circle-form').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const id = document.getElementById('circle-edit-id').value;
+  const circle_name = document.getElementById('circle-edit-name').value.trim();
+  const teacher_name = document.getElementById('circle-edit-teacher-name').value.trim();
+  const username = document.getElementById('circle-edit-username').value.trim();
+  const level = document.getElementById('circle-edit-level').value;
+  const pass = document.getElementById('circle-edit-password').value.trim();
+
+  const teachers = getTable('teachers');
+  const idx = teachers.findIndex(t => t.id === id);
+  if (idx >= 0) {
+    teachers[idx].circle_name = circle_name;
+    teachers[idx].name = teacher_name;
+    teachers[idx].username = username;
+    teachers[idx].level = level;
+    teachers[idx].password_hash = pass;
+    setTable('teachers', teachers);
+
+    const sel = document.getElementById('user-role-selector');
+    if (sel) {
+      const opt = sel.querySelector(`option[value="${id}"]`);
+      if (opt) opt.textContent = `📖 ${circle_name} - ${teacher_name}`;
+    }
+
+    showToast(`تم تحديث بيانات ${circle_name} بنجاح ✅`, 'success');
+    closeModal('edit-circle-modal');
+    loadAdminCircles();
+  }
+});
+
+function viewTeacher(tid) {
+  const teachers = getTable('teachers');
+  const t = teachers.find(x => x.id === tid);
+  if (!t) return;
+  const students = getTable('students').filter(s => s.teacher_id === tid);
+  
+  document.getElementById('modal-teacher-title').textContent = `${t.name} — ${t.circle_name}`;
+  document.getElementById('modal-teacher-body').innerHTML = `
+    <div style="background:var(--bg-glass);padding:12px;border-radius:8px;margin-bottom:16px;border:1px solid var(--border)">
+      <div style="font-size:0.9rem">المستوى: <strong class="text-gold">${t.level || 'حفظ غيبي 🧠'}</strong> | اسم المستخدم: <strong>${t.username}</strong></div>
+    </div>
+    <div class="card-title" style="margin-bottom:12px">📚 قائمة طلاب الحلقة (${students.length} طالب)</div>
+    <div style="max-height:260px;overflow-y:auto">
+      ${students.map((s, idx) => `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:0.88rem">
+        <div><strong>${s.name}</strong> <span style="font-size:0.78rem;color:var(--text-muted)">(الهوية: ${s.national_id || '1098765432'})</span></div>
+        <div style="display:flex;gap:4px;align-items:center">
+          <span class="badge-points">${fmt(s.points||0)} ⭐</span>
+          <button class="btn btn-sm btn-gold" onclick="exportPrintableHTMLCertificate('student', '${s.id}')">📄 HTML / طباعة</button>
+        </div>
+      </div>`).join('')}
+    </div>
+  `;
+  document.getElementById('teacher-modal').classList.add('open');
+}
+
+// ADMIN SUBMIT: Add & Assign Student
+document.getElementById('admin-add-student-form').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const teacherId = document.getElementById('admin-stu-circle').value;
+  const name = document.getElementById('admin-stu-name').value.trim();
+  const nationalId = document.getElementById('admin-stu-national-id').value.trim();
+  const birthDate = document.getElementById('admin-stu-birth-date').value;
+  const birthPlace = document.getElementById('admin-stu-birth-place').value.trim();
+  const level = document.getElementById('admin-stu-level').value;
+
+  const teachers = getTable('teachers');
+  const tch = teachers.find(t => t.id === teacherId);
+
+  const students = getTable('students');
+  const newStudent = {
+    id: `s-admin-${Date.now()}`,
+    teacher_id: teacherId,
+    name: name,
+    national_id: nationalId,
+    birth_date: birthDate,
+    birth_place: birthPlace,
+    level: level,
+    last_page: 0,
+    behavior_score: 10,
+    points: 0,
+    status: 'active',
+    is_newly_assigned: true,
+    created_at: new Date().toISOString()
+  };
+
+  students.push(newStudent);
+  setTable('students', students);
+
+  const notifications = getTable('teacher_notifications');
+  notifications.push({
+    id: `notif-${Date.now()}`,
+    teacher_id: teacherId,
+    student_name: name,
+    national_id: nationalId,
+    read: false,
+    date: getTodayDate()
+  });
+  setTable('teacher_notifications', notifications);
+
+  showToast(`تم فرز الطالب "${name}" إلى "${tch?.circle_name || 'الحلقة'}" وإرسال إشعار للمعلم بنجاح 🔔`, 'success');
+  e.target.reset();
+  loadAdminAddStudentSection();
+});
+
+function loadAdminEvaluation() {
+  const teachers = getTable('teachers').filter(t => t.role === 'teacher');
+  const reports = getTable('monthly_reports');
+  const students = getTable('students');
+
+  const cards = teachers.map(t => {
+    const rep = reports.find(r => r.teacher_id === t.id);
+    const circleStus = students.filter(s => s.teacher_id === t.id);
+    const avgBehavior = circleStus.length ? (circleStus.reduce((a,b)=>a+(b.behavior_score||9),0)/circleStus.length).toFixed(1) : 9;
+    const pages = rep ? (rep.total_pages_circle || 0) : 0;
+    const sent = !!rep;
+
+    let score = sent ? 30 : 0;
+    if (pages > 250) score += 40; else if (pages > 150) score += 30; else if (pages > 0) score += 15;
+    score += Math.round(avgBehavior * 3);
+
+    const r = 54, circ = 2 * Math.PI * r;
+    const fill = (score / 100) * circ;
+    const evalClass = score >= 80 ? 'eval-excellent' : score >= 60 ? 'eval-good' : 'eval-average';
+    const evalText = score >= 80 ? 'ممتاز 🌟' : score >= 60 ? 'جيد جداً 👍' : 'جيد';
+
+    return `<div class="card" style="text-align:center">
+      <div class="score-ring">
+        <svg width="120" height="120" viewBox="0 0 120 120">
+          <circle class="score-ring-bg" cx="60" cy="60" r="${r}" fill="none" stroke-width="10"/>
+          <circle class="score-ring-fill" cx="60" cy="60" r="${r}" fill="none" stroke-width="10"
+            stroke-dasharray="${fill} ${circ}" stroke-dashoffset="0"/>
+        </svg>
+        <div class="score-text"><div class="score-number ${evalClass}">${score}</div><div class="score-max">/100</div></div>
+      </div>
+      <div style="font-weight:700;font-size:1.05rem;margin-bottom:4px;color:var(--gold)">${t.circle_name}</div>
+      <span class="badge-level" style="margin-bottom:8px;display:inline-block">${t.level || 'حفظ غيبي'}</span><br>
+      <div style="font-size:0.85rem;color:var(--text-muted);margin-bottom:8px">${t.name}</div>
+      <span class="badge ${evalClass==='eval-excellent'?'badge-active':'badge-gold'}">${evalText}</span>
+      <div style="margin-top:14px;font-size:0.85rem;color:var(--text-muted);border-top:1px solid var(--border);padding-top:10px">
+        📄 <strong>${fmt(pages)}</strong> صفحة | ⭐ سلوك: <strong>${avgBehavior}</strong>/10
+      </div>
+    </div>`;
+  });
+
+  document.getElementById('evaluation-content').innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px">${cards.join('')}</div>`;
+}
+
+function loadAdminTopStudents() {
+  const students = getTable('students').filter(s => s.status === 'active').sort((a,b) => (b.points||0) - (a.points||0));
+  const teachers = getTable('teachers');
+
+  const top3 = students.slice(0, 3);
+  const ranks = ['🥇', '🥈', '🥉'];
+  const rankClass = ['rank-1', 'rank-2', 'rank-3'];
+
+  document.getElementById('top-students-global').innerHTML = top3.map((s, i) => {
+    const tch = teachers.find(t => t.id === s.teacher_id);
+    return `
+      <div class="top-student-card ${rankClass[i]}">
+        <div class="star-glow">⭐</div>
+        <div class="top-rank">${ranks[i]}</div>
+        <div class="top-student-name">${s.name}</div>
+        <div class="top-pages">${fmt(s.points || 0)} ⭐</div>
+        <div class="top-pages-label">نقطة وسام الحفظ والسلوك</div>
+        <div class="top-circle-name">${tch?.circle_name || 'حلقة'} (${s.level || 'غيبي'})</div>
+        <div style="display:flex;gap:6px;justify-content:center;margin-top:10px;flex-wrap:wrap">
+          <button class="btn btn-sm btn-gold" onclick="exportPrintableHTMLCertificate('student', '${s.id}')">📄 تصدير HTML</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  document.getElementById('honor-roll-tbody').innerHTML = students.slice(0, 20).map((s, i) => {
+    const tch = teachers.find(t => t.id === s.teacher_id);
+    return `
+      <tr>
+        <td class="td-center"><strong>${i+1}</strong></td>
+        <td><strong>${s.name}</strong></td>
+        <td><span class="badge-level">${s.level || 'حفظ غيبي'}</span></td>
+        <td>${tch?.circle_name || '—'} (${tch?.name || ''})</td>
+        <td class="td-center text-gold fw-900">${fmt(s.points || 0)} ⭐</td>
+        <td class="td-center">${s.last_page} صفحة</td>
+        <td class="td-center">
+          <button class="btn btn-sm btn-gold" onclick="exportPrintableHTMLCertificate('student', '${s.id}')">📄 تصدير HTML / طباعة</button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function loadAdminTeachersMini() {
+  const teachers = getTable('teachers').filter(t => t.role === 'teacher');
+  document.getElementById('teachers-list-mini').innerHTML = teachers.map(t => `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">
+      <div><strong>${t.name}</strong> <span class="badge-level">${t.level||'غيبي'}</span></div>
+      <button class="btn btn-sm btn-gold" onclick="document.getElementById('user-role-selector').value='${t.id}';switchRole('teacher', '${t.id}')">الذهاب للحلقة</button>
+    </div>
+  `).join('');
+}
+
+document.getElementById('add-teacher-form').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const name = document.getElementById('t-name').value.trim();
+  const username = document.getElementById('t-username').value.trim();
+  const circle = document.getElementById('t-circle').value.trim();
+  const level = document.getElementById('t-level').value;
+  const pass = document.getElementById('t-pass').value.trim();
+
+  const teachers = getTable('teachers');
+  teachers.push({ id: `t-${Date.now()}`, name, username, password_hash: pass, circle_name: circle, level, role: 'teacher', is_active: true });
+  setTable('teachers', teachers);
+
+  showToast(`تمت إضافة المعلم "${name}" بالمستوى "${level}" بنجاح ✅`, 'success');
+  e.target.reset();
+  loadAdminTeachersMini();
+});
+
+// ===================================================
+// TEACHER LOGIC & DAILY INTERFACE
+// ===================================================
+function loadDailyInterface() {
+  const user = Session.get();
+  const dateStr = document.getElementById('daily-date-picker').value || getTodayDate();
+  document.getElementById('daily-date-picker').value = dateStr;
+
+  document.getElementById('daily-title').textContent = `📅 التفقد والتسميع اليومي (${dateStr})`;
+  document.getElementById('daily-sub').textContent = `حلقة: ${user.circle_name} | المعلم: ${user.name}`;
+  document.getElementById('daily-circle-level').textContent = `المستوى: ${user.level || 'حفظ غيبي 🧠'}`;
+
+  const notifs = getTable('teacher_notifications').filter(n => n.teacher_id === user.id && !n.read);
+  const banner = document.getElementById('teacher-notif-banner');
+  if (banner) {
+    if (notifs.length > 0) {
+      const names = notifs.map(n => `<strong>${n.student_name}</strong> (رقم الهوية: ${n.national_id || '—'})`).join('، ');
+      banner.innerHTML = `
+        <div style="background:rgba(212,168,67,0.2);border:2px solid #d4a843;border-radius:12px;padding:12px 18px;color:#fef08a;font-size:0.95rem;display:flex;align-items:center;justify-content:space-between">
+          <div>🔔 <strong>إشعار من المشرف العام:</strong> تم فرز طالب جديد لحلقتك: ${names}. يرجى تحديد صفحته ورصد حضوره وسلوكه.</div>
+          <button class="btn btn-sm btn-gold" onclick="markTeacherNotifsRead('${user.id}')">تم الإطلاع ✓</button>
+        </div>
+      `;
+    } else {
+      banner.innerHTML = '';
+    }
+  }
+
+  const students = getTable('students').filter(s => s.teacher_id === user.id);
+  document.getElementById('daily-total-count').textContent = students.length;
+
+  let presentCount = 0;
+  let pagesCount = 0;
+
+  const dailyLogs = getTable('daily_logs').filter(d => d.teacher_id === user.id && d.date === dateStr);
+
+  const tbody = document.getElementById('daily-tbody');
+  tbody.innerHTML = students.map((s, idx) => {
+    const log = dailyLogs.find(l => l.student_id === s.id);
+    const isPresent = log ? log.status === 'present' : (idx % 9 !== 0);
+    if (isPresent) presentCount++;
+
+    const memToday = log ? log.memorized_today : 1;
+    pagesCount += isPresent ? memToday : 0;
+    const curPage = log ? log.page_reached : (s.last_page || 0);
+    const behavior = log ? log.behavior_score : (s.behavior_score || 10);
+
+    return `
+      <tr data-student-id="${s.id}">
+        <td class="td-center">${idx + 1}</td>
+        <td>
+          <strong>${s.name}</strong>
+          ${s.is_newly_assigned ? '<span class="badge badge-gold" style="font-size:0.7rem;margin-right:4px">جديد 🔔</span>' : ''}
+        </td>
+        <td><span class="badge-level">${s.level || user.level || 'غيبي'}</span></td>
+        <td class="td-center">
+          <select class="form-control daily-status" style="width:auto;display:inline-block;padding:4px">
+            <option value="present" ${isPresent?'selected':''}>🟢 حاضر</option>
+            <option value="absent" ${!isPresent?'selected':''}>🔴 غائب</option>
+          </select>
+        </td>
+        <td class="td-center">
+          <div style="display:flex;align-items:center;justify-content:center;gap:3px">
+            <button type="button" class="btn btn-sm btn-secondary" style="padding:2px 7px;font-size:0.75rem" onclick="stepStudentPage('${s.id}', -1)" title="الصفحة السابقة ◀️">◀️</button>
+            <input type="number" id="page-input-${s.id}" class="form-control daily-page" value="${curPage}" style="width:65px;text-align:center" min="0" max="604">
+            <button type="button" class="btn btn-sm btn-secondary" style="padding:2px 7px;font-size:0.75rem" onclick="stepStudentPage('${s.id}', 1)" title="الصفحة التالية ▶️">▶️</button>
+          </div>
+        </td>
+        <td class="td-center">
+          <input type="number" class="form-control daily-mem" value="${memToday}" style="width:65px;text-align:center">
+        </td>
+        <td class="td-center">
+          <input type="number" class="form-control daily-behavior" value="${behavior}" style="width:60px;text-align:center" min="1" max="10">
+        </td>
+        <td>
+          <input type="text" class="form-control daily-notes" value="${log?.notes || 'تسميع جيد جداً'}" placeholder="ملاحظة المعلم...">
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  document.getElementById('daily-present-count').textContent = presentCount;
+  document.getElementById('daily-pages-count').textContent = pagesCount;
+}
+
+function loadTeacherAnalytics() {
+  const user = Session.get();
+  const stus = getTable('students').filter(s => s.teacher_id === user.id && s.status === 'active').sort((a,b) => (b.points||0) - (a.points||0));
+
+  const bestStudent = stus[0];
+  const banner = document.getElementById('teacher-best-student-banner');
+  if (banner && bestStudent) {
+    banner.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px">
+        <div>
+          <div style="font-size:1.4rem;font-weight:900;color:#fef08a">🌟 أفضل طالب بالحلقة لهذا الشهر (تحليل الأداء المقارن)</div>
+          <div style="font-size:1.2rem;color:#ffffff;margin-top:4px">
+            طالب وسام التميز: <strong style="color:#fef08a;font-size:1.35rem">${bestStudent.name}</strong>
+          </div>
+          <div style="font-size:0.9rem;color:#d4a843;margin-top:4px">
+            إنجاز صفحة: <strong>${bestStudent.last_page || 0}</strong> | مجموع النقاط: <strong>${fmt(bestStudent.points || 0)} ⭐</strong> | علامة السلوك: <strong>${bestStudent.behavior_score || 10}/10</strong>
+          </div>
+        </div>
+        <button class="btn btn-gold" style="font-size:1.05rem;padding:12px 24px" onclick="exportPrintableHTMLCertificate('student', '${bestStudent.id}')">📄 تصدير بطاقة الطالب HTML</button>
+      </div>
+    `;
+  }
+
+  const tbody = document.getElementById('teacher-analytics-tbody');
+  if (tbody) {
+    tbody.innerHTML = stus.map((s, idx) => {
+      const pagesMonth = Math.floor(10 + (s.last_page * 0.1));
+      const attRate = Math.min(100, 85 + (idx % 15));
+      return `
+        <tr>
+          <td class="td-center"><strong>${idx + 1}</strong></td>
+          <td><strong>${s.name}</strong></td>
+          <td><span class="badge-level">${s.level || 'غيبي'}</span></td>
+          <td class="td-center">${s.last_page || 0} صفحة</td>
+          <td class="td-center text-gold fw-900">${pagesMonth} صفحة</td>
+          <td class="td-center">${attRate}%</td>
+          <td class="td-center">${s.behavior_score || 10} / 10</td>
+          <td class="td-center"><span class="badge-points">${fmt(s.points || 0)} ⭐</span></td>
+          <td class="td-center">
+            <button class="btn btn-sm btn-gold" onclick="exportPrintableHTMLCertificate('student', '${s.id}')">📄 HTML / طباعة</button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  const daysArr = Array.from({length: 31}, (_, i) => `${i+1}`);
+  const dailyVals = daysArr.map((d, i) => Math.floor(12 + (Math.sin(i * 0.6) * 5) + (i % 4)));
+  renderBarChart('teacherDailyAnalyticsChart', daysArr, dailyVals);
+}
+
+function markTeacherNotifsRead(teacherId) {
+  const notifs = getTable('teacher_notifications');
+  notifs.forEach(n => { if (n.teacher_id === teacherId) n.read = true; });
+  setTable('teacher_notifications', notifs);
+  showToast('تم الإطلاع على الإشعار ✅', 'info');
+  loadDailyInterface();
+}
+
+function saveDailyLogs() {
+  const user = Session.get();
+  const dateStr = document.getElementById('daily-date-picker').value;
+
+  const allLogs = getTable('daily_logs').filter(l => !(l.teacher_id === user.id && l.date === dateStr));
+  const students = getTable('students');
+
+  document.querySelectorAll('#daily-tbody tr[data-student-id]').forEach(tr => {
+    const sId = tr.dataset.studentId;
+    const status = tr.querySelector('.daily-status').value;
+    const page = parseInt(tr.querySelector('.daily-page').value) || 0;
+    const mem = parseInt(tr.querySelector('.daily-mem').value) || 0;
+    const behavior = parseInt(tr.querySelector('.daily-behavior').value) || 10;
+    const notes = tr.querySelector('.daily-notes').value.trim();
+
+    allLogs.push({
+      id: `daily-${dateStr}-${sId}`,
+      date: dateStr,
+      teacher_id: user.id,
+      student_id: sId,
+      status: status,
+      page_reached: page,
+      memorized_today: mem,
+      behavior_score: behavior,
+      notes: notes
+    });
+
+    const sIdx = students.findIndex(s => s.id === sId);
+    if (sIdx >= 0) {
+      students[sIdx].last_page = page;
+      students[sIdx].behavior_score = behavior;
+      students[sIdx].is_newly_assigned = false;
+      students[sIdx].points = (page * 5) + (behavior * 15) + (status === 'present' ? 10 : 0);
+    }
+  });
+
+  setTable('daily_logs', allLogs);
+  setTable('students', students);
+  showToast('تم حفظ التسميع والتفقد اليومي بنجاح ✅', 'success');
+  loadDailyInterface();
+}
+
+function loadTeacherStudents() {
+  const user = Session.get();
+  document.getElementById('teacher-circle-title').textContent = `📚 طلاب ${user.circle_name}`;
+  document.getElementById('teacher-sub-info').textContent = `المعلم: ${user.name} | المستوى: ${user.level || 'حفظ غيبي 🧠'}`;
+
+  const stus = getTable('students').filter(s => s.teacher_id === user.id);
+  teacherStudents = stus;
+
+  renderTeacherStudentsTable(teacherStudents);
+
+  const active = stus.filter(s => s.status === 'active').length;
+  const totalPoints = stus.reduce((a,b)=>a+(b.points||0),0);
+
+  document.getElementById('teacher-stats-cards').innerHTML = `
+    <div class="stat-card"><div class="stat-icon green">📚</div><div><div class="stat-value">${fmt(active)}</div><div class="stat-label">طالب نشط بالحلقة</div></div></div>
+    <div class="stat-card"><div class="stat-icon gold">⭐</div><div><div class="stat-value">${fmt(totalPoints)}</div><div class="stat-label">نقاط إنجاز وسام الحلقة</div></div></div>
+    <div class="stat-card"><div class="stat-icon blue">🎖️</div><div><div class="stat-value">${user.level || 'غيبي'}</div><div class="stat-label">مستوى الحلقة</div></div></div>
+    <div class="stat-card"><div class="stat-icon purple">👥</div><div><div class="stat-value">${fmt(stus.length)}</div><div class="stat-label">إجمالي طلاب الحلقة</div></div></div>
+  `;
+}
+
+function renderTeacherStudentsTable(list) {
+  const tbody = document.getElementById('students-tbody');
+  tbody.innerHTML = list.map((s, i) => `
+    <tr>
+      <td class="td-center">${i+1}</td>
+      <td><strong>${s.name}</strong></td>
+      <td><span class="badge-level">${s.level || 'غيبي'}</span></td>
+      <td class="td-center text-gold fw-900">${s.last_page || 0} صفحة</td>
+      <td class="td-center">${s.behavior_score || 10} / 10</td>
+      <td class="td-center"><span class="badge-points">${fmt(s.points || 0)} ⭐</span></td>
+      <td class="td-center">
+        <button class="btn btn-sm btn-gold" onclick="exportPrintableHTMLCertificate('student', '${s.id}')">📄 HTML / طباعة</button>
+      </td>
+      <td class="td-center">
+        <button class="btn btn-sm btn-secondary" onclick="openEditModal('${s.id}')">✏️ تعديل</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function filterStudents() {
+  const q = document.getElementById('search-stu').value.toLowerCase().trim();
+  const filtered = teacherStudents.filter(s => s.name.toLowerCase().includes(q));
+  renderTeacherStudentsTable(filtered);
+}
+
+function openAddStudentModal() {
+  document.getElementById('stu-id').value = '';
+  document.getElementById('stu-name').value = '';
+  document.getElementById('stu-last-page').value = '';
+  document.getElementById('stu-behavior').value = '10';
+  document.getElementById('modal-stu-title').textContent = 'إضافة طالب جديد بالحلقة';
+  document.getElementById('student-modal').classList.add('open');
+}
+
+function openEditModal(id) {
+  const stu = teacherStudents.find(s => s.id === id);
+  if (!stu) return;
+  document.getElementById('stu-id').value = stu.id;
+  document.getElementById('stu-name').value = stu.name;
+  document.getElementById('stu-level').value = stu.level || 'حفظ غيبي 🧠';
+  document.getElementById('stu-last-page').value = stu.last_page || 0;
+  document.getElementById('stu-behavior').value = stu.behavior_score || 10;
+  document.getElementById('modal-stu-title').textContent = 'تعديل بيانات الطالب';
+  document.getElementById('student-modal').classList.add('open');
+}
+
+document.getElementById('student-form').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const user = Session.get();
+  const id = document.getElementById('stu-id').value;
+  const name = document.getElementById('stu-name').value.trim();
+  const level = document.getElementById('stu-level').value;
+  const last_page = parseInt(document.getElementById('stu-last-page').value) || 0;
+  const behavior = parseInt(document.getElementById('stu-behavior').value) || 10;
+
+  const students = getTable('students');
+
+  if (id) {
+    const idx = students.findIndex(s => s.id === id);
+    if (idx >= 0) {
+      students[idx].name = name;
+      students[idx].level = level;
+      students[idx].last_page = last_page;
+      students[idx].behavior_score = behavior;
+      students[idx].points = (last_page * 5) + (behavior * 15);
+    }
+    showToast('تم تحديث بيانات الطالب بنجاح ✅');
+  } else {
+    students.push({
+      id: `s-${Date.now()}`,
+      teacher_id: user.id,
+      name,
+      level,
+      last_page,
+      behavior_score: behavior,
+      points: (last_page * 5) + (behavior * 15),
+      status: 'active'
+    });
+    showToast('تمت إضافة الطالب بنجاح ✅');
+  }
+
+  setTable('students', students);
+  closeModal('student-modal');
+  loadTeacherStudents();
+});
+
+// CERTIFICATE STUDENT NAVIGATION LOGIC
+function openCertificateModal(studentId) {
+  const students = getTable('students').filter(s => s.status === 'active');
+  certStudentsList = students;
+  
+  let idx = certStudentsList.findIndex(s => s.id === studentId);
+  if (idx < 0) idx = 0;
+  currentCertStudentIndex = idx;
+
+  renderCurrentCertStudent();
+  document.getElementById('certificate-modal').classList.add('open');
+}
+
+function renderCurrentCertStudent() {
+  if (!certStudentsList || certStudentsList.length === 0) return;
+  
+  const orgName = getOrganizationName();
+  const stu = certStudentsList[currentCertStudentIndex];
+  const teachers = getTable('teachers');
+  const tch = teachers.find(t => t.id === stu.teacher_id);
+
+  const counterEl = document.getElementById('cert-nav-counter');
+  if (counterEl) {
+    counterEl.textContent = `طالب ${currentCertStudentIndex + 1} من ${certStudentsList.length}`;
+  }
+
+  document.getElementById('cert-main-title').textContent = '🏆 شهادة شكر وتقدير 🏆';
+  document.getElementById('cert-sub-title').textContent = `تتقدم ${orgName} بجزيل الشكر والامتنان للطالب المتميز`;
+  document.getElementById('cert-student-name').textContent = stu.name;
+
+  document.getElementById('cert-body-text').innerHTML = `
+    تقديراً لجهوده المباركة وحفظه المتميز برواية حلقة <strong style="color:#fef08a">${tch?.circle_name || 'حلقة التحفيظ'}</strong><br>
+    في مستوى: <span style="font-weight:700;color:#34d399">${stu.level || tch?.level || 'حفظ غيبي 🧠'}</span> | وإنجاز صفحة رقم: <strong style="color:#facc15">${stu.last_page || 0}</strong> | بمجموع نقاط: <strong style="color:#fef08a">${fmt(stu.points || 0)}</strong> ⭐<br>
+    وعلامة سلوك متميزة ورفيعة المستوى. نسأل الله أن يجعله من أهل القرآن وخاصته.
+  `;
+
+  document.getElementById('cert-circle-name').textContent = tch?.circle_name || 'حلقة التحفيظ';
+  document.getElementById('cert-level').textContent = stu.level || tch?.level || 'حفظ غيبي 🧠';
+  document.getElementById('cert-pages').textContent = stu.last_page || 0;
+  document.getElementById('cert-points').textContent = fmt(stu.points || 0);
+  document.getElementById('cert-teacher-name').textContent = tch?.name || 'معلم الحلقة';
+
+  exportCertificateAsPNG('certificate-print-area', `بطاقة_تقدير_${stu.name.replace(/\s+/g, '_')}`);
+}
+
+function navigateCertificateStudent(delta) {
+  if (!certStudentsList || certStudentsList.length === 0) return;
+  
+  let newIdx = currentCertStudentIndex + delta;
+  if (newIdx < 0) newIdx = certStudentsList.length - 1;
+  if (newIdx >= certStudentsList.length) newIdx = 0;
+  
+  currentCertStudentIndex = newIdx;
+  renderCurrentCertStudent();
+}
+
+function loadTeacherWeeklyReport() {
+  const user = Session.get();
+  document.getElementById('auto-report-month-tag').textContent = getActiveDateLabel();
+
+  const students = getTable('students').filter(s => s.teacher_id === user.id);
+  const dailyLogs = getTable('daily_logs').filter(d => d.teacher_id === user.id);
+
+  const tbody = document.getElementById('auto-report-tbody');
+  tbody.innerHTML = students.map((s, idx) => {
+    const logs = dailyLogs.filter(l => l.student_id === s.id);
+    const attDays = logs.filter(l => l.status === 'present').length || 20;
+    const pagesDone = logs.reduce((a,b)=>a+(b.memorized_today||0),0) || Math.floor((s.last_page || 0) * 0.15);
+
+    return `
+      <tr>
+        <td class="td-center">${idx + 1}</td>
+        <td><strong>${s.name}</strong></td>
+        <td><span class="badge-level">${s.level || 'غيبي'}</span></td>
+        <td class="td-center">${s.last_page || 0} صفحة</td>
+        <td class="td-center text-gold fw-900">${pagesDone} صفحة</td>
+        <td class="td-center">${attDays} يوم</td>
+        <td class="td-center">${s.behavior_score || 10} / 10</td>
+        <td class="td-center"><span class="badge-points">${fmt(s.points || 0)} ⭐</span></td>
+      </tr>
+    `;
+  }).join('');
+}
+
+// Initial Kickoff
+renderHeaderDateOptions();
+document.getElementById('daily-date-picker').value = getTodayDate();
+
+// Check if user is logged in; if not, open login overlay automatically
+const activeUser = Session.get();
+if (activeUser && activeUser.id && activeUser.name) {
+  if (activeUser.role === 'admin') {
+    document.getElementById('user-role-selector').value = 'admin';
+    switchRole('admin');
+  } else {
+    document.getElementById('user-role-selector').value = activeUser.id;
+    switchRole('teacher', activeUser.id);
+  }
+} else {
+  switchRole('admin');
+  showLoginOverlay();
+}
+</script>
+</body>
+</html>

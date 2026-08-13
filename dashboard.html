@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>لوحة المشرف - نظام إدارة حلقات التحفيظ</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="bg-pattern"></div>
+<div class="app-layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <span class="logo-icon">📖</span>
+      <h2>نظام حلقات التحفيظ</h2>
+    </div>
+    <nav class="nav-links">
+      <button class="nav-link active" onclick="showSection('overview', this)"><span class="nav-icon">🏠</span> الرئيسية</button>
+      <button class="nav-link" onclick="showSection('circles', this)"><span class="nav-icon">🔵</span> الحلقات والمعلمون</button>
+      <button class="nav-link" onclick="showSection('evaluation', this)"><span class="nav-icon">⭐</span> التقييم العام</button>
+      <button class="nav-link" onclick="showSection('top-students', this)"><span class="nav-icon">🏆</span> نجوم الحلقات</button>
+      <button class="nav-link" onclick="showSection('add-teacher', this)"><span class="nav-icon">➕</span> إضافة معلم</button>
+    </nav>
+    <div class="nav-divider"></div>
+    <button class="theme-btn mb-12" onclick="toggleTheme()">☀️ / 🌙 تبديل المظهر</button>
+    <button class="btn btn-secondary btn-sm w-full mb-12" onclick="resetSeedData(true)" style="justify-content:center;font-size:0.8rem">🔄 إعادة شحن البيانات الافتراضية</button>
+
+    <div class="nav-user-section">
+      <div class="nav-user-card"><div id="nav-user-info"></div></div>
+      <button class="btn-logout" onclick="logout()">🚪 تسجيل الخروج</button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main-content">
+
+    <!-- ===== OVERVIEW ===== -->
+    <section id="sec-overview">
+      <div class="page-header flex-between">
+        <div>
+          <h1>🏠 لوحة التحكم الرئيسية</h1>
+          <p id="greeting-text"></p>
+        </div>
+        <div class="badge badge-gold" style="font-size:0.9rem;padding:8px 16px;">
+          📅 الشهر الحالي: <strong id="current-month-display"></strong>
+        </div>
+      </div>
+
+      <div class="stats-grid" id="admin-stats"></div>
+
+      <div class="grid-2 mb-24">
+        <div class="card">
+          <div class="card-title">📊 مقارنة أداء الحلقات (إنجاز الصفحات)</div>
+          <div id="circlesChart"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">📅 آخر التقارير المرسلة</div>
+          <div id="recent-reports-list"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== CIRCLES ===== -->
+    <section id="sec-circles" class="hidden">
+      <div class="page-header flex-between">
+        <div>
+          <h1>🔵 الحلقات والمعلمون</h1>
+          <p>إدارة الحلقات ومتابعة المعلمين والطلاب</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="table-toolbar">
+          <div class="card-title" style="margin:0;border:none;padding:0">👥 قائمة المعلمين</div>
+          <div class="search-input-wrap">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="search-teachers" class="form-control" placeholder="بحث باسم المعلم أو الحلقة..." oninput="filterTeachersTable()">
+          </div>
+        </div>
+        <div class="table-wrapper">
+          <table id="teachers-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>اسم المعلم</th>
+                <th>اسم الحلقة</th>
+                <th>عدد الطلاب</th>
+                <th>آخر تقرير</th>
+                <th>الحالة</th>
+                <th>إجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="teachers-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== EVALUATION ===== -->
+    <section id="sec-evaluation" class="hidden">
+      <div class="page-header">
+        <h1>⭐ التقييم العام للحلقات</h1>
+        <p>مؤشر أداء وسرعة تسليم تقارير الحلقات والإنجاز</p>
+      </div>
+      <div id="evaluation-content"></div>
+    </section>
+
+    <!-- ===== TOP STUDENTS ===== -->
+    <section id="sec-top-students" class="hidden">
+      <div class="page-header flex-between">
+        <div>
+          <h1>🏆 نجوم الحلقات المتميزون</h1>
+          <p>أفضل الطلاب أداءً عبر كل الحلقات</p>
+        </div>
+        <div>
+          <select id="top-month-filter" class="form-control" style="width:auto" onchange="loadTopStudents()">
+          </select>
+        </div>
+      </div>
+
+      <div class="top-students-grid" id="top-students-global"></div>
+
+      <div class="card">
+        <div class="card-title">🌟 لوحة الشرف الكاملة</div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>الترتيب</th>
+                <th>اسم الطالب</th>
+                <th>الحلقة / المعلم</th>
+                <th>الصفحات المنجزة</th>
+                <th>أيام الحضور</th>
+              </tr>
+            </thead>
+            <tbody id="honor-roll-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== ADD TEACHER ===== -->
+    <section id="sec-add-teacher" class="hidden">
+      <div class="page-header">
+        <h1>➕ إضافة معلم جديد</h1>
+        <p>إنشاء حساب معلم جديد للحلقة مع كلمة مرور خاصة</p>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">📝 بيانات المعلم الجديد</div>
+          <form id="add-teacher-form">
+            <div class="form-group">
+              <label>الاسم الكامل للمعلم</label>
+              <input type="text" id="t-name" class="form-control" placeholder="مثال: الشيخ عبد الرحمن" required>
+            </div>
+            <div class="form-group">
+              <label>اسم المستخدم (للدخول)</label>
+              <input type="text" id="t-username" class="form-control" placeholder="مثال: teacher6" required>
+            </div>
+            <div class="form-group">
+              <label>اسم الحلقة</label>
+              <input type="text" id="t-circle" class="form-control" placeholder="مثال: حلقة الهدى" required>
+            </div>
+            <div class="form-group">
+              <label>كلمة المرور</label>
+              <input type="text" id="t-pass" class="form-control" placeholder="أدخل كلمة مرور قوية" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-full" style="justify-content:center;margin-top:8px">إضافة المعلم الآن ✅</button>
+          </form>
+        </div>
+
+        <div class="card">
+          <div class="card-title">👥 المعلمون الحاليون</div>
+          <div id="teachers-list-mini"></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- Modal: تفاصيل معلم -->
+<div class="modal-overlay" id="teacher-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="modal-teacher-title">تفاصيل المعلم والحلقة</span>
+      <button class="modal-close" onclick="closeModal('teacher-modal')">✕</button>
+    </div>
+    <div id="modal-teacher-body"></div>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+<script>
+// Auto-login fallback if user opens dashboard.html directly
+let user = Session.get();
+if (!user) {
+  user = { id: 'admin-id', name: 'المشرف العام', username: 'admin', role: 'admin' };
+  Session.set(user);
+}
+renderNavUser();
+
+// Greeting
+const hour = new Date().getHours();
+const greet = hour < 12 ? 'صباح الخير' : hour < 18 ? 'مساء الخير' : 'مساء النور';
+document.getElementById('greeting-text').textContent = `${greet}، ${user.name} 👋`;
+document.getElementById('current-month-display').textContent = formatMonthAr(getCurrentMonth());
+
+// Month filter init
+const monthSel = document.getElementById('top-month-filter');
+for (let i = 0; i < 12; i++) {
+  const d = new Date(); d.setMonth(d.getMonth() - i);
+  const val = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+  const opt = new Option(formatMonthAr(val), val);
+  if (i === 0) opt.selected = true;
+  monthSel.appendChild(opt);
+}
+
+let cachedTeachers = [];
+
+function showSection(name, btnEl) {
+  document.querySelectorAll('.app-layout main section').forEach(s => s.classList.add('hidden'));
+  document.getElementById(`sec-${name}`).classList.remove('hidden');
+  if (btnEl) {
+    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+    btnEl.classList.add('active');
+  }
+  if (name === 'overview') loadOverview();
+  if (name === 'circles') loadCircles();
+  if (name === 'evaluation') loadEvaluation();
+  if (name === 'top-students') loadTopStudents();
+  if (name === 'add-teacher') loadTeachersMini();
+}
+
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+// ===================== OVERVIEW =====================
+async function loadOverview() {
+  const teachersRes = await db.from('teachers').select().eq('role', 'teacher');
+  const studentsRes = await db.from('students').select().eq('status', 'active');
+  const reportsRes = await db.from('monthly_reports').select().order('submitted_at', { ascending: false });
+
+  const teachers = teachersRes.data || [];
+  const students = studentsRes.data || [];
+  const reports = reportsRes.data || [];
+
+  const currentM = getCurrentMonth();
+  const [cy, cm] = currentM.split('-').map(Number);
+  const workDays = calcWorkingDays(cy, cm);
+
+  const statsEl = document.getElementById('admin-stats');
+  statsEl.innerHTML = `
+    <div class="stat-card"><div class="stat-icon gold">👨‍🏫</div><div><div class="stat-value">${fmt(teachers.length)}</div><div class="stat-label">إجمالي المعلمين</div></div></div>
+    <div class="stat-card"><div class="stat-icon green">📚</div><div><div class="stat-value">${fmt(students.length)}</div><div class="stat-label">الطلاب النشطون</div></div></div>
+    <div class="stat-card"><div class="stat-icon blue">📋</div><div><div class="stat-value">${fmt(reports.length)}</div><div class="stat-label">التقارير المرفوعة</div></div></div>
+    <div class="stat-card"><div class="stat-icon purple">📅</div><div><div class="stat-value">${workDays}</div><div class="stat-label">أيام الدوام هذا الشهر</div></div></div>
+  `;
+
+  // Recent reports feed
+  const rr = document.getElementById('recent-reports-list');
+  if (!reports.length) {
+    rr.innerHTML = '<div class="empty-state"><div class="empty-icon">📭</div><p>لا توجد تقارير مرفوعة بعد</p></div>';
+  } else {
+    rr.innerHTML = reports.slice(0, 5).map(r => {
+      const t = teachers.find(x => x.id === r.teacher_id);
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)">
+        <div>
+          <div style="font-weight:700">${t?.name || 'معلم'}</div>
+          <div style="font-size:0.8rem;color:var(--text-muted)">${t?.circle_name || 'حلقة'}</div>
+        </div>
+        <div style="text-align:left">
+          <span class="badge badge-gold">${formatMonthAr(r.report_month)}</span>
+          <div style="font-size:0.8rem;color:var(--gold);font-weight:700;margin-top:2px">${fmt(r.total_pages_circle)} صفحة</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // Pure SVG/CSS Bar Chart
+  const circleDataRes = await db.from('monthly_reports').select();
+  const circleData = circleDataRes.data || [];
+  const labels = [], vals = [];
+
+  teachers.forEach(t => {
+    const rep = circleData.find(r => r.teacher_id === t.id);
+    labels.push(t.circle_name || t.name);
+    vals.push(rep ? rep.total_pages_circle || 0 : 0);
+  });
+
+  renderBarChart('circlesChart', labels, vals);
+}
+
+// ===================== CIRCLES =====================
+async function loadCircles() {
+  const { data: teachers } = await db.from('teachers').select().eq('role', 'teacher').order('created_at');
+  cachedTeachers = teachers || [];
+  renderTeachersTable(cachedTeachers);
+}
+
+async function renderTeachersTable(list) {
+  const tbody = document.getElementById('teachers-tbody');
+  if (!list.length) {
+    tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">👥</div><p>لا يوجد معلمون مطبقون للبحث</p></div></td></tr>';
+    return;
+  }
+
+  const rows = await Promise.all(list.map(async (t, i) => {
+    const { data: stus } = await db.from('students').select().eq('teacher_id', t.id).eq('status', 'active');
+    const { data: lastReport } = await db.from('monthly_reports').select().eq('teacher_id', t.id).order('submitted_at', { ascending: false }).limit(1).maybeSingle();
+
+    return `<tr>
+      <td class="td-center">${i+1}</td>
+      <td><strong>${t.name}</strong></td>
+      <td>${t.circle_name || '—'}</td>
+      <td class="td-center"><span class="badge badge-gold">${stus?.length || 0} طالب</span></td>
+      <td class="td-center">${lastReport ? formatMonthAr(lastReport.report_month) : '<span class="text-muted">لم يُرسل</span>'}</td>
+      <td class="td-center"><span class="badge ${t.is_active ? 'badge-active' : 'badge-dropout'}">${t.is_active ? 'نشط' : 'موقوف'}</span></td>
+      <td class="td-center">
+        <div class="btn-group" style="justify-content:center">
+          <button class="btn btn-sm btn-secondary" onclick="viewTeacher('${t.id}')">👁️ تفاصيل</button>
+          <button class="btn btn-sm ${t.is_active ? 'btn-danger' : 'btn-success'}" onclick="toggleTeacher('${t.id}', ${t.is_active})">${t.is_active ? '🔴 إيقاف' : '🟢 تفعيل'}</button>
+        </div>
+      </td>
+    </tr>`;
+  }));
+
+  tbody.innerHTML = rows.join('');
+}
+
+function filterTeachersTable() {
+  const q = document.getElementById('search-teachers').value.toLowerCase().trim();
+  const filtered = cachedTeachers.filter(t => 
+    (t.name && t.name.toLowerCase().includes(q)) || 
+    (t.circle_name && t.circle_name.toLowerCase().includes(q))
+  );
+  renderTeachersTable(filtered);
+}
+
+async function viewTeacher(tid) {
+  const { data: t } = await db.from('teachers').select().eq('id', tid).single();
+  const { data: students } = await db.from('students').select().eq('teacher_id', tid).order('name');
+  
+  document.getElementById('modal-teacher-title').textContent = `${t.name} — ${t.circle_name || 'حلقة'}`;
+  document.getElementById('modal-teacher-body').innerHTML = `
+    <div style="background:var(--bg-glass);padding:12px;border-radius:8px;margin-bottom:16px;border:1px solid var(--border)">
+      <div style="font-size:0.9rem;margin-bottom:4px">اسم المستخدم: <strong class="text-gold">${t.username}</strong></div>
+      <div style="font-size:0.9rem">الحالة الحالية: <span class="badge ${t.is_active ? 'badge-active' : 'badge-dropout'}">${t.is_active ? 'نشط' : 'موقوف'}</span></div>
+    </div>
+    
+    <div class="card-title" style="margin-bottom:12px">📚 قائمة طلاب الحلقة (${students?.length||0})</div>
+    <div style="max-height:220px;overflow-y:auto;padding-left:4px">
+      ${(students||[]).length === 0 ? '<p class="text-muted">لا يوجد طلاب مسجلون بعد.</p>' : 
+        (students||[]).map(s=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">
+          <div><strong>${s.name}</strong> <span style="font-size:0.8rem;color:var(--text-muted);margin-right:8px">(آخر صفحة: ${s.last_page})</span></div>
+          <span class="badge ${s.status==='active'?'badge-active':s.status==='transferred'?'badge-transferred':'badge-dropout'}">${s.status==='active'?'نشط':s.status==='transferred'?'منقول':'متسرب'}</span>
+        </div>`).join('')}
+    </div>
+    <button class="btn btn-secondary btn-sm w-full" style="margin-top:16px;justify-content:center" onclick="resetPassword('${t.id}')">🔑 إعادة تعيين كلمة المرور</button>
+  `;
+  document.getElementById('teacher-modal').classList.add('open');
+}
+
+async function toggleTeacher(id, isActive) {
+  await db.from('teachers').update({ is_active: !isActive }).eq('id', id);
+  showToast(isActive ? 'تم إيقاف المعلم' : 'تم تفعيل المعلم', 'info');
+  loadCircles();
+}
+
+async function resetPassword(id) {
+  const newPass = prompt('أدخل كلمة المرور الجديدة للمعلم:');
+  if (!newPass) return;
+  await db.from('teachers').update({ password_hash: newPass }).eq('id', id);
+  showToast('تم تحديث كلمة المرور بنجاح ✅', 'success');
+}
+
+// ===================== EVALUATION =====================
+async function loadEvaluation() {
+  const el = document.getElementById('evaluation-content');
+  const { data: teachers } = await db.from('teachers').select().eq('role', 'teacher');
+  const { data: reports } = await db.from('monthly_reports').select();
+
+  if (!teachers?.length) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">📊</div><p>لا يوجد معلمون في النظام</p></div>';
+    return;
+  }
+
+  const cards = teachers.map(t => {
+    const rep = reports?.find(r => r.teacher_id === t.id);
+    const pages = rep?.total_pages_circle || 0;
+    const sent = !!rep;
+    let score = 0;
+    if (sent) score += 40;
+    if (pages > 200) score += 40; else if (pages > 100) score += 30; else if (pages > 0) score += 15;
+    if (t.is_active) score += 20;
+
+    const r = 54, circ = 2 * Math.PI * r;
+    const fill = (score / 100) * circ;
+    const evalClass = score >= 80 ? 'eval-excellent' : score >= 60 ? 'eval-good' : score >= 40 ? 'eval-average' : 'eval-poor';
+    const evalText = score >= 80 ? 'ممتاز 🌟' : score >= 60 ? 'جيد جداً 👍' : score >= 40 ? 'جيد' : 'يحتاج متابعة ⚠️';
+
+    return `<div class="card" style="text-align:center">
+      <div class="score-ring">
+        <svg width="120" height="120" viewBox="0 0 120 120">
+          <circle class="score-ring-bg" cx="60" cy="60" r="${r}" fill="none" stroke-width="10"/>
+          <circle class="score-ring-fill" cx="60" cy="60" r="${r}" fill="none" stroke-width="10"
+            stroke-dasharray="${fill} ${circ}" stroke-dashoffset="0"/>
+        </svg>
+        <div class="score-text"><div class="score-number ${evalClass}">${score}</div><div class="score-max">/100</div></div>
+      </div>
+      <div style="font-weight:700;font-size:1.05rem;margin-bottom:4px">${t.name}</div>
+      <div style="font-size:0.85rem;color:var(--text-muted);margin-bottom:8px">${t.circle_name||'حلقة'}</div>
+      <span class="badge ${evalClass==='eval-excellent'?'badge-active':evalClass==='eval-poor'?'badge-dropout':'badge-gold'}">${evalText}</span>
+      <div style="margin-top:14px;font-size:0.85rem;color:var(--text-muted);border-top:1px solid var(--border);padding-top:10px">
+        ${sent ? `✅ تقرير التميز مرفوع` : '❌ لم يرسل التقرير بعد'}<br>
+        📄 ${fmt(pages)} صفحة منجزة
+      </div>
+    </div>`;
+  });
+  el.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:20px">${cards.join('')}</div>`;
+}
+
+// ===================== TOP STUDENTS =====================
+async function loadTopStudents() {
+  const { data: reports } = await db.from('monthly_reports').select();
+
+  if (!reports?.length) {
+    document.getElementById('top-students-global').innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">🏆</div><p>لا توجد بيانات تقارير حالياً</p></div>';
+    document.getElementById('honor-roll-tbody').innerHTML = '<tr><td colspan="5" class="td-center text-muted">لا توجد سجلات</td></tr>';
+    return;
+  }
+
+  const reportIds = reports.map(r => r.id);
+  const { data: records } = await db.from('student_monthly_records').select().in('report_id', reportIds);
+  const { data: students } = await db.from('students').select();
+  const { data: teachers } = await db.from('teachers').select();
+
+  const enriched = (records || []).map(rec => {
+    const stu = students?.find(s => s.id === rec.student_id);
+    const rep = reports?.find(r => r.id === rec.report_id);
+    const tch = teachers?.find(t => t.id === rep?.teacher_id);
+    return {
+      ...rec,
+      studentName: stu?.name || 'طالب',
+      circleName: tch?.circle_name || tch?.name || '—'
+    };
+  }).sort((a, b) => b.pages_completed - a.pages_completed);
+
+  const top3 = enriched.slice(0, 3);
+  const ranks = ['🥇', '🥈', '🥉'];
+  const rankClass = ['rank-1', 'rank-2', 'rank-3'];
+
+  document.getElementById('top-students-global').innerHTML = top3.map((s, i) => `
+    <div class="top-student-card ${rankClass[i]}">
+      <div class="star-glow">⭐</div>
+      <div class="top-rank">${ranks[i]}</div>
+      <div class="top-student-name">${s.studentName}</div>
+      <div class="top-pages">${fmt(s.pages_completed)}</div>
+      <div class="top-pages-label">صفحة منجزة هذا الشهر</div>
+      <div class="top-circle-name">حلقة: ${s.circleName}</div>
+    </div>
+  `).join('');
+
+  document.getElementById('honor-roll-tbody').innerHTML = enriched.slice(0, 20).map((s, i) => `
+    <tr>
+      <td class="td-center"><strong>${i+1}</strong></td>
+      <td><strong>${s.studentName}</strong></td>
+      <td>${s.circleName}</td>
+      <td class="td-center text-gold fw-900">${fmt(s.pages_completed)}</td>
+      <td class="td-center">${s.attendance_days} يوم</td>
+    </tr>
+  `).join('');
+}
+
+// ===================== ADD TEACHER =====================
+async function loadTeachersMini() {
+  const { data: teachers } = await db.from('teachers').select().eq('role', 'teacher').order('created_at', { ascending: false });
+  const el = document.getElementById('teachers-list-mini');
+  if (!teachers?.length) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">👥</div><p>لا يوجد معلمون</p></div>';
+    return;
+  }
+  el.innerHTML = teachers.map(t => `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)">
+      <div>
+        <div style="font-weight:700">${t.name}</div>
+        <div style="font-size:0.8rem;color:var(--text-muted)">${t.circle_name||''} · اسم المستخدم: <span class="text-gold">${t.username}</span></div>
+      </div>
+      <button class="btn btn-sm btn-danger" onclick="deleteTeacher('${t.id}', '${t.name}')">🗑️</button>
+    </div>
+  `).join('');
+}
+
+document.getElementById('add-teacher-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const name = document.getElementById('t-name').value.trim();
+  const username = document.getElementById('t-username').value.trim();
+  const circle = document.getElementById('t-circle').value.trim();
+  const pass = document.getElementById('t-pass').value.trim();
+
+  const { data, error } = await db.from('teachers').insert({
+    name, username, password_hash: pass, circle_name: circle, role: 'teacher', is_active: true
+  });
+
+  if (error) {
+    showToast('خطأ في الإضافة', 'error');
+    return;
+  }
+
+  showToast(`تمت إضافة المعلم "${name}" بنجاح ✅`, 'success');
+  e.target.reset();
+  loadTeachersMini();
+});
+
+async function deleteTeacher(id, name) {
+  if (!confirm(`هل أنت متأكد من حذف حساب المعلم "${name}"؟`)) return;
+  await db.from('teachers').delete().eq('id', id);
+  showToast(`تم حذف حساب المعلم ${name}`, 'info');
+  loadTeachersMini();
+}
+
+// Initial load
+loadOverview();
+</script>
+</body>
+</html>

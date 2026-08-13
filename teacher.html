@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>لوحة المعلم - نظام إدارة حلقات التحفيظ</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="bg-pattern"></div>
+<div class="app-layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <span class="logo-icon">📖</span>
+      <h2>نظام حلقات التحفيظ</h2>
+    </div>
+    <nav class="nav-links">
+      <button class="nav-link active" onclick="showSection('students', this)"><span class="nav-icon">📚</span> طلاب الحلقة</button>
+      <button class="nav-link" onclick="location.href='report.html'"><span class="nav-icon">📋</span> التقرير الشهري</button>
+    </nav>
+    <div class="nav-divider"></div>
+    <button class="theme-btn" onclick="toggleTheme()">☀️ / 🌙 تبديل المظهر</button>
+    <div class="nav-user-section">
+      <div class="nav-user-card"><div id="nav-user-info"></div></div>
+      <button class="btn-logout" onclick="logout()">🚪 تسجيل الخروج</button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main-content">
+    <div class="page-header flex-between">
+      <div>
+        <h1 id="circle-title">📚 طلاب الحلقة</h1>
+        <p id="teacher-sub"></p>
+      </div>
+      <div class="btn-group">
+        <a href="report.html" class="btn btn-gold">📋 كتابة التقرير الشهري ←</a>
+        <button class="btn btn-primary" onclick="openAddStudentModal()">➕ إضافة طالب جديد</button>
+      </div>
+    </div>
+
+    <div class="stats-grid" id="teacher-stats"></div>
+
+    <div class="card">
+      <div class="table-toolbar">
+        <div class="card-title" style="margin:0;border:none;padding:0">👥 قائمة طلاب الحلقة</div>
+        <div class="search-input-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="search-stu" class="form-control" placeholder="بحث باسم الطالب..." oninput="filterStudents()">
+        </div>
+      </div>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>اسم الطالب الكامل</th>
+              <th>آخر صفحة تم الوصول إليها</th>
+              <th>مجموع الصفحات</th>
+              <th>الحالة</th>
+              <th>إجراءات</th>
+            </tr>
+          </thead>
+          <tbody id="students-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Modal: إضافة/تعديل طالب -->
+<div class="modal-overlay" id="student-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="modal-stu-title">إضافة طالب جديد</span>
+      <button class="modal-close" onclick="closeModal('student-modal')">✕</button>
+    </div>
+    <form id="student-form">
+      <input type="hidden" id="stu-id">
+      <div class="form-group">
+        <label>اسم الطالب الكامل</label>
+        <input type="text" id="stu-name" class="form-control" placeholder="أدخل اسم الطالب الثلاثي" required>
+      </div>
+      <div class="form-group mb-24">
+        <label>آخر صفحة محفوطة (الحالية)</label>
+        <input type="number" id="stu-last-page" class="form-control" min="0" max="604" placeholder="مثال: 120" required>
+      </div>
+      <div class="btn-group" style="justify-content:flex-end">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('student-modal')">إلغاء</button>
+        <button type="submit" class="btn btn-primary">حفظ الطالب ✅</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+<script>
+let user = Session.get();
+if (!user) {
+  user = { id: 't1-id', name: 'الشيخ عبد الرحمن السعدي', username: 'teacher1', role: 'teacher', circle_name: 'حلقة الفجر' };
+  Session.set(user);
+}
+renderNavUser();
+
+document.getElementById('circle-title').textContent = `📚 ${user.circle_name || 'حلقة التحفيظ'}`;
+document.getElementById('teacher-sub').textContent = `المعلم: ${user.name}`;
+
+let allStudents = [];
+
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+async function loadStudents() {
+  const { data: stus } = await db.from('students').select().eq('teacher_id', user.id).order('name');
+  allStudents = stus || [];
+  renderStudents(allStudents);
+  updateTeacherStats(allStudents);
+}
+
+function updateTeacherStats(list) {
+  const active = list.filter(s => s.status === 'active').length;
+  const trans = list.filter(s => s.status === 'transferred').length;
+  const drop = list.filter(s => s.status === 'dropout').length;
+
+  document.getElementById('teacher-stats').innerHTML = `
+    <div class="stat-card"><div class="stat-icon green">📚</div><div><div class="stat-value">${fmt(active)}</div><div class="stat-label">طالب نشط</div></div></div>
+    <div class="stat-card"><div class="stat-icon blue">🔄</div><div><div class="stat-value">${fmt(trans)}</div><div class="stat-label">طالب منقول</div></div></div>
+    <div class="stat-card"><div class="stat-icon red">⚠️</div><div><div class="stat-value">${fmt(drop)}</div><div class="stat-label">طالب متسرب</div></div></div>
+    <div class="stat-card"><div class="stat-icon gold">👥</div><div><div class="stat-value">${fmt(list.length)}</div><div class="stat-label">مجموع الطلاب</div></div></div>
+  `;
+}
+
+function renderStudents(list) {
+  const tbody = document.getElementById('students-tbody');
+  if (!list.length) {
+    tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><div class="empty-icon">📚</div><p>لا يوجد طلاب مسجلون بعد</p></div></td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = list.map((s, i) => `
+    <tr>
+      <td class="td-center">${i+1}</td>
+      <td><strong>${s.name}</strong></td>
+      <td class="td-center text-gold fw-900">${s.last_page}</td>
+      <td class="td-center">${s.total_pages || s.last_page}</td>
+      <td class="td-center">
+        <select class="form-control" style="padding:4px 8px;font-size:0.85rem;width:auto;display:inline-block" onchange="changeStatus('${s.id}', this.value)">
+          <option value="active" ${s.status==='active'?'selected':''}>🟢 نشط</option>
+          <option value="transferred" ${s.status==='transferred'?'selected':''}>🔵 منقول</option>
+          <option value="dropout" ${s.status==='dropout'?'selected':''}>🔴 متسرب</option>
+        </select>
+      </td>
+      <td class="td-center">
+        <div class="btn-group" style="justify-content:center">
+          <button class="btn btn-sm btn-secondary" onclick="openEditModal('${s.id}')">✏️ تعديل</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteStudent('${s.id}', '${s.name}')">🗑️</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function filterStudents() {
+  const q = document.getElementById('search-stu').value.toLowerCase().trim();
+  const filtered = allStudents.filter(s => s.name.toLowerCase().includes(q));
+  renderStudents(filtered);
+}
+
+function openAddStudentModal() {
+  document.getElementById('stu-id').value = '';
+  document.getElementById('stu-name').value = '';
+  document.getElementById('stu-last-page').value = '';
+  document.getElementById('modal-stu-title').textContent = 'إضافة طالب جديد';
+  document.getElementById('student-modal').classList.add('open');
+}
+
+function openEditModal(id) {
+  const stu = allStudents.find(s => s.id === id);
+  if (!stu) return;
+  document.getElementById('stu-id').value = stu.id;
+  document.getElementById('stu-name').value = stu.name;
+  document.getElementById('stu-last-page').value = stu.last_page;
+  document.getElementById('modal-stu-title').textContent = 'تعديل بيانات الطالب';
+  document.getElementById('student-modal').classList.add('open');
+}
+
+document.getElementById('student-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const id = document.getElementById('stu-id').value;
+  const name = document.getElementById('stu-name').value.trim();
+  const last_page = parseInt(document.getElementById('stu-last-page').value);
+
+  if (id) {
+    await db.from('students').update({ name, last_page, total_pages: last_page }).eq('id', id);
+    showToast('تم تعديل بيانات الطالب بنجاح ✅', 'success');
+  } else {
+    await db.from('students').insert({
+      teacher_id: user.id,
+      name,
+      last_page,
+      total_pages: last_page,
+      status: 'active'
+    });
+    showToast('تمت إضافة الطالب بنجاح ✅', 'success');
+  }
+
+  closeModal('student-modal');
+  loadStudents();
+});
+
+async function changeStatus(id, newStatus) {
+  await db.from('students').update({ status: newStatus }).eq('id', id);
+  showToast('تم تحديث حالة الطالب بنجاح', 'info');
+  loadStudents();
+}
+
+async function deleteStudent(id, name) {
+  if (!confirm(`هل أنت متأكد من حذف الطالب "${name}"؟`)) return;
+  await db.from('students').delete().eq('id', id);
+  showToast(`تم حذف الطالب ${name}`, 'info');
+  loadStudents();
+}
+
+loadStudents();
+</script>
+</body>
+</html>

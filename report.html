@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>نموذج التقرير الشهري - نظام إدارة حلقات التحفيظ</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .month-picker-bar {
+      background: var(--bg-glass); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 16px 20px;
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 24px; flex-wrap: wrap; gap: 14px;
+    }
+    .month-picker-group { display: flex; align-items: center; gap: 12px; }
+    .page-input-group { display: flex; align-items: center; gap: 6px; }
+    .page-input-group input { width: 75px; text-align: center; font-weight: 700; }
+    .prev-page-badge { font-size: 0.8rem; color: var(--text-muted); text-align: center; }
+    .computed-val { font-weight: 900; color: var(--gold); text-align: center; font-size: 1rem; }
+    .table-report th { text-align: center; font-size: 0.83rem; }
+    .table-report td { vertical-align: middle; }
+  </style>
+</head>
+<body>
+<div class="bg-pattern"></div>
+<div class="app-layout">
+
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <span class="logo-icon">📖</span>
+      <h2>نظام حلقات التحفيظ</h2>
+    </div>
+    <nav class="nav-links">
+      <button class="nav-link" onclick="location.href='teacher.html'"><span class="nav-icon">📚</span> طلاب الحلقة</button>
+      <button class="nav-link active" onclick="location.href='report.html'"><span class="nav-icon">📋</span> التقرير الشهري</button>
+    </nav>
+    <div class="nav-divider"></div>
+    <button class="theme-btn" onclick="toggleTheme()">☀️ / 🌙 تبديل المظهر</button>
+    <div class="nav-user-section">
+      <div class="nav-user-card"><div id="nav-user-info"></div></div>
+      <button class="btn-logout" onclick="logout()">🚪 تسجيل الخروج</button>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <div class="page-header flex-between">
+      <div>
+        <h1>📋 نموذج التقرير الشهري للحلقة</h1>
+        <p id="teacher-info-sub"></p>
+      </div>
+      <div class="btn-group">
+        <button class="btn btn-secondary" onclick="exportExcel()">📊 تصدير Excel</button>
+        <button class="btn btn-gold" onclick="submitReport()">💾 حفظ وإرسال التقرير النهائي</button>
+      </div>
+    </div>
+
+    <!-- Month & Days Bar -->
+    <div class="month-picker-bar">
+      <div class="month-picker-group">
+        <label><strong>تحديد الشهر:</strong></label>
+        <input type="month" id="report-month" class="form-control" style="width:auto" onchange="onMonthOrDaysChange()">
+      </div>
+      <div class="month-picker-group">
+        <label><strong>أيام الدوام هذا الشهر:</strong></label>
+        <input type="number" id="working-days" class="form-control" style="width:90px;text-align:center" min="1" max="31" onchange="onMonthOrDaysChange()">
+        <span style="font-size:0.82rem;color:var(--text-muted)">(تراعي الإجازات والأعياد)</span>
+      </div>
+      <div style="font-size:0.9rem">
+        إجمالي انجاز الحلقة: <strong id="total-circle-pages" class="text-gold" style="font-size:1.2rem;margin-right:4px">0</strong> صفحة
+      </div>
+    </div>
+
+    <!-- Main Form Card -->
+    <div class="card">
+      <div class="card-title">📝 كشف الحفظ والمواظبة لطلاب الحلقة</div>
+      <div class="table-wrapper">
+        <table class="table-report" id="report-table">
+          <thead>
+            <tr>
+              <th style="width:40px">#</th>
+              <th>اسم الطالب</th>
+              <th style="width:130px">الصفحة المحفوظة</th>
+              <th style="width:90px">إنجاز الشهر</th>
+              <th style="width:110px">أيام الحضور</th>
+              <th>ملاحظات المعلم</th>
+              <th style="width:110px">حالة الطالب</th>
+            </tr>
+          </thead>
+          <tbody id="report-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="js/app.js"></script>
+<script>
+let user = Session.get();
+if (!user) {
+  user = { id: 't1-id', name: 'الشيخ عبد الرحمن السعدي', username: 'teacher1', role: 'teacher', circle_name: 'حلقة الفجر' };
+  Session.set(user);
+}
+renderNavUser();
+
+document.getElementById('teacher-info-sub').textContent = `المعلم: ${user.name} | الحلقة: ${user.circle_name || 'حلقة التحفيظ'}`;
+
+const monthInp = document.getElementById('report-month');
+monthInp.value = getCurrentMonth();
+
+let students = [];
+let prevRecordsMap = {}; // student_id -> last_page before this month
+
+async function initReportForm() {
+  const [y, m] = monthInp.value.split('-').map(Number);
+  const autoDays = calcWorkingDays(y, m);
+  document.getElementById('working-days').value = autoDays;
+
+  // Load students for this teacher
+  const { data: stus } = await db.from('students').select().eq('teacher_id', user.id).order('name');
+  students = stus || [];
+
+  // Check if a report already exists for this month
+  const { data: existingReport } = await db.from('monthly_reports').select()
+    .eq('teacher_id', user.id).eq('report_month', monthInp.value).maybeSingle();
+
+  let existingRecords = [];
+  if (existingReport) {
+    document.getElementById('working-days').value = existingReport.working_days;
+    const { data: recs } = await db.from('student_monthly_records').select().eq('report_id', existingReport.id);
+    existingRecords = recs || [];
+  }
+
+  // Load previous month records to calculate progress accurately
+  const prevM = getPrevMonth(monthInp.value);
+  const { data: prevReport } = await db.from('monthly_reports').select().eq('teacher_id', user.id).eq('report_month', prevM).maybeSingle();
+  if (prevReport) {
+    const { data: pRecs } = await db.from('student_monthly_records').select().eq('report_id', prevReport.id);
+    (pRecs || []).forEach(r => { prevRecordsMap[r.student_id] = r.new_page; });
+  }
+
+  renderReportTable(existingRecords);
+}
+
+function renderReportTable(existingRecords = []) {
+  const tbody = document.getElementById('report-tbody');
+  const maxDays = parseInt(document.getElementById('working-days').value) || 22;
+
+  if (!students.length) {
+    tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">📚</div><p>لا يوجد طلاب في حقتك مسجلون. قم بإضافة طلاب من شاشة طلاب الحلقة أولاً.</p></div></td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = students.map((s, idx) => {
+    const rec = existingRecords.find(r => r.student_id === s.id);
+    const startPage = prevRecordsMap[s.id] !== undefined ? prevRecordsMap[s.id] : (s.last_page || 0);
+    const curNewPage = rec ? rec.new_page : (s.last_page || startPage);
+    const pagesDone = Math.max(0, curNewPage - startPage);
+    const attendance = rec ? rec.attendance_days : maxDays;
+    const notes = rec ? (rec.notes || '') : '';
+    const status = rec ? rec.student_status : s.status;
+
+    return `
+      <tr data-student-id="${s.id}" data-prev-page="${startPage}">
+        <td class="td-center">${idx + 1}</td>
+        <td><strong>${s.name}</strong></td>
+        <td>
+          <div class="page-input-group">
+            <input type="number" class="form-control inp-new-page" value="${curNewPage}" min="0" max="604" oninput="calcRow(this)">
+          </div>
+          <div class="prev-page-badge">البداية: ${startPage}</div>
+        </td>
+        <td class="td-center"><span class="computed-val row-pages-done">${pagesDone}</span> صفحة</td>
+        <td class="td-center">
+          <input type="number" class="form-control inp-attendance" value="${attendance}" min="0" max="${maxDays}" style="width:70px;text-align:center;margin:0 auto">
+        </td>
+        <td>
+          <input type="text" class="form-control inp-notes" value="${notes}" placeholder="ملاحظة أو تنبيه...">
+        </td>
+        <td class="td-center">
+          <select class="form-control inp-status" style="padding:4px;font-size:0.8rem;width:auto">
+            <option value="active" ${status==='active'?'selected':''}>🟢 نشط</option>
+            <option value="transferred" ${status==='transferred'?'selected':''}>🔵 منقول</option>
+            <option value="dropout" ${status==='dropout'?'selected':''}>🔴 متسرب</option>
+          </select>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  recalcTotalCirclePages();
+}
+
+function calcRow(inputEl) {
+  const tr = inputEl.closest('tr');
+  const prevPage = parseInt(tr.dataset.prevPage) || 0;
+  const newPage = parseInt(inputEl.value) || 0;
+  const done = Math.max(0, newPage - prevPage);
+  tr.querySelector('.row-pages-done').textContent = done;
+  recalcTotalCirclePages();
+}
+
+function recalcTotalCirclePages() {
+  let total = 0;
+  document.querySelectorAll('.row-pages-done').forEach(span => {
+    total += parseInt(span.textContent) || 0;
+  });
+  document.getElementById('total-circle-pages').textContent = fmt(total);
+}
+
+function onMonthOrDaysChange() {
+  initReportForm();
+}
+
+async function submitReport() {
+  const month = monthInp.value;
+  const workingDays = parseInt(document.getElementById('working-days').value) || 22;
+  const totalCirclePages = parseInt(document.getElementById('total-circle-pages').textContent.replace(/[^0-9]/g,'')) || 0;
+
+  // 1. Create/Update monthly_reports record
+  const repData = {
+    teacher_id: user.id,
+    report_month: month,
+    working_days: workingDays,
+    total_pages_circle: totalCirclePages,
+    submitted_at: new Date().toISOString()
+  };
+
+  const { data: existing } = await db.from('monthly_reports').select()
+    .eq('teacher_id', user.id).eq('report_month', month).maybeSingle();
+
+  let reportId = existing?.id;
+  if (reportId) {
+    await db.from('monthly_reports').update(repData).eq('id', reportId);
+  } else {
+    const { data: inserted } = await db.from('monthly_reports').insert(repData);
+    reportId = inserted.id;
+  }
+
+  // 2. Save student records
+  const rows = document.querySelectorAll('#report-tbody tr[data-student-id]');
+  for (const tr of rows) {
+    const student_id = tr.dataset.studentId;
+    const prev_page = parseInt(tr.dataset.prevPage) || 0;
+    const new_page = parseInt(tr.querySelector('.inp-new-page').value) || prev_page;
+    const pages_completed = Math.max(0, new_page - prev_page);
+    const attendance_days = parseInt(tr.querySelector('.inp-attendance').value) || 0;
+    const notes = tr.querySelector('.inp-notes').value.trim();
+    const student_status = tr.querySelector('.inp-status').value;
+
+    const recordPayload = {
+      report_id: reportId,
+      student_id,
+      prev_page,
+      new_page,
+      pages_completed,
+      attendance_days,
+      notes,
+      student_status
+    };
+
+    // Upsert student record
+    const { data: existingRec } = await db.from('student_monthly_records').select()
+      .eq('report_id', reportId).eq('student_id', student_id).maybeSingle();
+
+    if (existingRec) {
+      await db.from('student_monthly_records').update(recordPayload).eq('id', existingRec.id);
+    } else {
+      await db.from('student_monthly_records').insert(recordPayload);
+    }
+
+    // Update main student record
+    await db.from('students').update({
+      last_page: new_page,
+      total_pages: new_page,
+      status: student_status
+    }).eq('id', student_id);
+  }
+
+  showToast('تم حفظ وإرسال التقرير الشهري بنجاح ✅', 'success');
+  setTimeout(() => location.href = 'teacher.html', 1000);
+}
+
+function exportExcel() {
+  let csv = "اسم الطالب,البداية,الصفحة الحالية,إنجاز الشهر,أيام الحضور,الملاحظات,الحالة\n";
+  document.querySelectorAll('#report-tbody tr[data-student-id]').forEach(tr => {
+    const name = tr.querySelector('strong').textContent;
+    const start = tr.dataset.prevPage;
+    const current = tr.querySelector('.inp-new-page').value;
+    const done = tr.querySelector('.row-pages-done').textContent;
+    const att = tr.querySelector('.inp-attendance').value;
+    const notes = tr.querySelector('.inp-notes').value;
+    const status = tr.querySelector('.inp-status').value;
+    csv += `"${name}",${start},${current},${done},${att},"${notes}","${status}"\n`;
+  });
+
+  const blob = new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = `تقرير_حلقة_${user.circle_name}_${monthInp.value}.csv`;
+  link.click();
+  showToast('تم تصدير ملف Excel (CSV) بنجاح 📊', 'success');
+}
+
+initReportForm();
+</script>
+</body>
+</html>
